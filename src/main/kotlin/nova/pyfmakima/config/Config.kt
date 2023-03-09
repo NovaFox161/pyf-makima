@@ -17,7 +17,8 @@ enum class Config(private val key: String, private var value: Any? = null) {
     CACHE_TTL_SETTINGS_MINUTES("bot.cache.ttl-minutes.settings", 60),
 
     // Global bot timings
-    TIMING_MESSAGE_DELETE_SECONDS("bot.timing-message-delete.seconds", 90),
+    TIMING_MESSAGE_REACT_SECONDS("bot.timing.message-react.seconds", 60),
+    TIMING_MESSAGE_DELETE_SECONDS("bot.timing.message-delete.seconds", 90),
 
     // Bot secrets
     SECRET_BOT_TOKEN("bot.secret.token"),
@@ -35,7 +36,21 @@ enum class Config(private val key: String, private var value: Any? = null) {
     SHARD_COUNT("bot.sharding.count"),
     SHARD_INDEX("bot.sharding.index"),
     LOGGING_WEBHOOKS_USE("bot.logging.webhooks.use", false),
-    LOGGING_WEBHOOKS_ALL_ERRORS("bot.logging.webhooks.all-errors", false);
+    LOGGING_WEBHOOKS_ALL_ERRORS("bot.logging.webhooks.all-errors", false),
+
+    MESSAGE_DELETE_CHANNEL("bot.message-delete.channel"),
+    MESSAGE_DELETE_REACTION_ROLE("bot.message-delete.reaction-role"),
+
+    EMOTE_WARNING_ID("bot.emote.warning.id"),
+    EMOTE_WARNING_NAME("bot.emote.warning.name"),
+    EMOTE_WARNING_ANIMATED("bot.emote.warning.animated"),
+    EMOTE_APPROVED_ID("bot.emote.approved.id"),
+    EMOTE_APPROVED_NAME("bot.emote.approved.name"),
+    EMOTE_APPROVED_ANIMATED("bot.emote.approved.animated"),
+    EMOTE_MARI_ID("bot.emote.mari.id"),
+    EMOTE_MARI_NAME("bot.emote.mari.name"),
+    EMOTE_MARI_ANIMATED("bot.emote.mari.animated"),
+    ;
 
     companion object {
         fun init() {

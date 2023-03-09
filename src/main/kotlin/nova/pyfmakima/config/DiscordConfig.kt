@@ -58,7 +58,7 @@ class DiscordConfig {
             .setEnabledIntents(getIntents())
             .setSharding(strategy)
             .setStore(Store.fromLayout(LegacyStoreLayout.of(stores)))
-            .setInitialPresence { ClientPresence.online(ClientActivity.playing("I don’t need a dog who says no")) }
+            .setInitialPresence { ClientPresence.online(ClientActivity.playing("I don’t need a dog who says no.")) }
             .setMemberRequestFilter(MemberRequestFilter.none())
             .withEventDispatcher { dispatcher ->
                 @Suppress("UNCHECKED_CAST")

@@ -26,6 +26,4 @@ class CacheConfig {
             )
             .build()
     }
-
-    // In-memory fallback caching
 }
