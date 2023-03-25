@@ -37,9 +37,14 @@ class DefaultMessageService(
     override suspend fun qualifiesForRuleThree(message: Message): Boolean {
         LOGGER.debug("Checking if message ${message.id.asString()} qualifies...")
 
+        val monitoredChannels = Config.MESSAGE_DELETE_CHANNEL.getString()
+            .split(",")
+            .filter(String::isNotBlank)
+            .map(Snowflake::of)
+
         // Filter messages that will never qualify
         if (!message.guildId.isPresent) return false
-        if (message.channelId != Config.MESSAGE_DELETE_CHANNEL.getLong().toSnowflake()) return false
+        if (!monitoredChannels.contains(message.channelId)) return false
         if (message.authorAsMember.map(Member::isBot).awaitSingle()) return false
 
         // Check if a mod has already reacted with the correct reaction (making it allowed no matter the content)
