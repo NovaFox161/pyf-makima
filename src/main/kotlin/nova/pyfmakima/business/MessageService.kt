@@ -15,7 +15,6 @@ import nova.pyfmakima.extensions.asSeconds
 import nova.pyfmakima.extensions.extractUrls
 import nova.pyfmakima.extensions.toSnowflake
 import nova.pyfmakima.logger.LOGGER
-import nova.pyfmakima.utils.GlobalValues
 import org.springframework.stereotype.Component
 import reactor.core.publisher.Mono
 import reactor.kotlin.core.publisher.toFlux
@@ -26,13 +25,6 @@ class DefaultMessageService(
     private val discordClient: GatewayDiscordClient,
 ): MessageService {
     private val trackedMessages = CopyOnWriteArrayList<Snowflake>()
-
-    override suspend fun containsMarisms(message: Message): Boolean {
-        for (marism in GlobalValues.knownMarisms) {
-            if (message.content.contains(marism, ignoreCase = true)) return true
-        }
-        return false
-    }
 
     override suspend fun qualifiesForRuleThree(message: Message): Boolean {
         LOGGER.debug("Checking if message ${message.id.asString()} qualifies...")
@@ -60,12 +52,13 @@ class DefaultMessageService(
         // Check if the message has disallowed media types
         if (message.attachments.isNotEmpty()) return true
         if (message.embeds.isNotEmpty()) return true
+        if (message.stickersItems.isNotEmpty()) return true
 
         // Check if the message contains links that do not link to discord
         val urlMatchCount = message.content.extractUrls()
             // Filter out discord links, they don't count
             .asSequence()
-            .map { LOGGER.debug("URL Match found: $it"); it }
+            .map { LOGGER.debug("URL Match found: {}", it); it }
             .filter { !it.host.startsWith("discord.com") }
             .filter { !it.host.startsWith("canary.discord.com") }
             .filter { !it.host.startsWith("ptb.discord.com") }
@@ -160,19 +153,9 @@ class DefaultMessageService(
 
         return ReactionEmoji.custom(id, name, animated)
     }
-
-    override fun getMariEmote(): ReactionEmoji {
-        val id = Config.EMOTE_MARI_ID.getLong().toSnowflake()
-        val name = Config.EMOTE_MARI_NAME.getString()
-        val animated = Config.EMOTE_MARI_ANIMATED.getBoolean()
-
-        return ReactionEmoji.custom(id, name, animated)
-    }
 }
 
 interface MessageService {
-    suspend fun containsMarisms(message: Message): Boolean
-
     suspend fun qualifiesForRuleThree(message: Message): Boolean
 
     suspend fun addToQueue(message: Message)
@@ -186,8 +169,6 @@ interface MessageService {
     fun getWarningEmote(): ReactionEmoji
 
     fun getApprovedEmote(): ReactionEmoji
-
-    fun getMariEmote(): ReactionEmoji
 }
 
 

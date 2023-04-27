@@ -47,9 +47,6 @@ enum class Config(private val key: String, private var value: Any? = null) {
     EMOTE_APPROVED_ID("bot.emote.approved.id"),
     EMOTE_APPROVED_NAME("bot.emote.approved.name"),
     EMOTE_APPROVED_ANIMATED("bot.emote.approved.animated"),
-    EMOTE_MARI_ID("bot.emote.mari.id"),
-    EMOTE_MARI_NAME("bot.emote.mari.name"),
-    EMOTE_MARI_ANIMATED("bot.emote.mari.animated"),
     ;
 
     companion object {
