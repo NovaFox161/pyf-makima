@@ -24,8 +24,8 @@ buildscript {
     }
 }
 
-val makimaVersion = "1.0.2"
-val gradleWrapperVersion = "8.0.1"
+val makimaVersion = "1.0.3"
+val gradleWrapperVersion = "8.1.1"
 val javaVersion = "19"
 val d4jVersion = "3.2.3"
 val d4jStoresVersion = "3.2.2"
