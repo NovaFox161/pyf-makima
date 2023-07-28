@@ -1,37 +1,37 @@
+
 import com.squareup.kotlinpoet.FileSpec
 import com.squareup.kotlinpoet.PropertySpec
 import com.squareup.kotlinpoet.TypeSpec
 import org.gradle.api.tasks.wrapper.Wrapper.DistributionType.ALL
-import org.jetbrains.kotlin.gradle.tasks.KotlinCompile
 
 plugins {
     // Kotlin
-    kotlin("jvm") version "1.8.0"
+    kotlin("jvm") version "1.9.0"
 
     // Spring
-    kotlin("plugin.spring") version "1.8.0"
-    id("org.springframework.boot") version "3.0.3"
-    id("io.spring.dependency-management") version "1.1.0"
+    kotlin("plugin.spring") version "1.9.0"
+    id("org.springframework.boot") version "3.1.2"
+    id("io.spring.dependency-management") version "1.1.2"
 
     // Tooling
     id("com.gorylenko.gradle-git-properties") version "2.4.1"
-    id("com.google.cloud.tools.jib") version "3.3.1"
+    id("com.google.cloud.tools.jib") version "3.3.2"
 }
 
 buildscript {
     dependencies {
-        classpath("com.squareup:kotlinpoet:1.12.0")
+        classpath("com.squareup:kotlinpoet:1.14.2")
     }
 }
 
-val makimaVersion = "1.0.3"
-val gradleWrapperVersion = "8.1.1"
+val makimaVersion = "1.1.0"
+val gradleWrapperVersion = "8.2.1"
 val javaVersion = "19"
-val d4jVersion = "3.2.3"
+val d4jVersion = "3.2.5"
 val d4jStoresVersion = "3.2.2"
 val discordWebhooksVersion = "0.8.2"
 val mysqlR2dbcVersion = "0.8.2.RELEASE"
-val springMockkVersion = "4.0.0"
+val springMockkVersion = "4.0.2"
 
 group = "nova"
 version = makimaVersion
@@ -158,7 +158,7 @@ tasks {
         }
     }
 
-    withType<KotlinCompile> {
+    compileKotlin {
         dependsOn(generateGitProperties)
 
         kotlinOptions {
@@ -167,7 +167,7 @@ tasks {
         }
     }
 
-    withType<Test> {
+    test {
         useJUnitPlatform()
     }
 
