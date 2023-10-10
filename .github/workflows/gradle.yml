@@ -65,10 +65,15 @@ jobs:
         run: chmod +x ./gradlew
 
       - name: Publish to CR with Gradle
+        uses: Wandalen/wretry.action@master
         env:
           SCW_USER: ${{ secrets.SCW_USER }}
           SCW_SECRET: ${{ secrets.SCW_SECRET }}
-        run: ./gradlew jib -Djib.to.auth.username=${SCW_USER} -Djib.to.auth.password=${SCW_SECRET}
+        with:
+          command: ./gradlew jib -Djib.to.auth.username=${SCW_USER} -Djib.to.auth.password=${SCW_SECRET}
+          attempt_limit: 10
+          # 1 minute in ms
+          attempt_delay: 60000
   deploy-dev:
     name: Deploy dev
     runs-on: ubuntu-latest
@@ -81,7 +86,7 @@ jobs:
 
       # Have K8S pull latest images for dev pods
       - name: Trigger dev deploy
-        uses: Consensys/kubernetes-action@master
+        uses: davi020/kubernetes-action@master
         env:
           KUBE_CONFIG_DATA: ${{ secrets.KUBE_CONFIG_DATA }}
         with:
