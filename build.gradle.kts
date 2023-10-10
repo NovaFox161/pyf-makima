@@ -31,6 +31,7 @@ val d4jStoresVersion = "3.2.2"
 val discordWebhooksVersion = "0.8.4"
 val mysqlR2dbcVersion = "0.8.2.RELEASE"
 val springMockkVersion = "4.0.2"
+val logbackContribVersion = "0.1.5"
 
 group = "nova"
 version = makimaVersion
@@ -77,6 +78,7 @@ dependencies {
     implementation("org.springframework.boot:spring-boot-starter-data-redis")
     implementation("org.springframework.boot:spring-boot-starter-webflux")
     implementation("org.springframework.boot:spring-boot-starter-cache")
+    implementation("org.springframework.boot:spring-boot-starter-actuator")
 
     // Database
     //implementation("org.flywaydb:flyway-core")
@@ -88,6 +90,11 @@ dependencies {
     // Serialization
     implementation("com.fasterxml.jackson.module:jackson-module-kotlin")
     implementation("com.fasterxml.jackson.datatype:jackson-datatype-jsr310")
+
+    // Observability
+    implementation("ch.qos.logback.contrib:logback-json-classic:$logbackContribVersion")
+    implementation("ch.qos.logback.contrib:logback-jackson:$logbackContribVersion")
+    implementation("io.micrometer:micrometer-registry-prometheus")
 
     // Discord
     implementation("com.discord4j:discord4j-core:$d4jVersion")
