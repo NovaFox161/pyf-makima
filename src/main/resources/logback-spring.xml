@@ -80,11 +80,11 @@
     <springProfile name="!local">
         <root level="DEBUG">
             <appender-ref ref="CONSOLE_JSON"/>
-            <appender-ref ref="DISCAL_WEBHOOK"/>
+            <appender-ref ref="DISCORD_WEBHOOK"/>
         </root>
     </springProfile>
 
     <root level="DEBUG">
-        <appender-ref ref="DISCAL_WEBHOOK"/>
+        <appender-ref ref="DISCORD_WEBHOOK"/>
     </root>
 </configuration>
