@@ -90,4 +90,4 @@ jobs:
         env:
           KUBE_CONFIG_DATA: ${{ secrets.KUBE_CONFIG_DATA }}
         with:
-          args: delete -n makima pods -l profile=dev,app=makima
+          args: delete -n personal pods -l env=dev,app=pyf-makima-bot
