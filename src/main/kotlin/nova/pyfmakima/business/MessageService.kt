@@ -23,10 +23,11 @@ import java.util.concurrent.CopyOnWriteArrayList
 @Component
 class DefaultMessageService(
     private val discordClient: GatewayDiscordClient,
+    private val metricService: MetricService,
 ): MessageService {
     private val trackedMessages = CopyOnWriteArrayList<Snowflake>()
 
-    override suspend fun qualifiesForRuleThree(message: Message): Boolean {
+    override suspend fun qualifiesForRuleNine(message: Message): Boolean {
         LOGGER.debug("Checking if message ${message.id.asString()} qualifies...")
 
         val monitoredChannels = Config.MESSAGE_DELETE_CHANNEL.getString()
@@ -80,6 +81,8 @@ class DefaultMessageService(
         val deleteMono = Mono.delay(messageDeleteDelay)
             .flatMap { mono { doDelete(message.id, message.channelId) } }
 
+        metricService.incrementMessageQualifyRuleNine()
+
         Mono.`when`(reactMono, deleteMono).awaitSingleOrNull()
     }
 
@@ -90,7 +93,7 @@ class DefaultMessageService(
             .getMessageById(channelId, messageId)
             .awaitSingleOrNull() ?: return
 
-        if (!qualifiesForRuleThree(message)) return // No longer qualifies
+        if (!qualifiesForRuleNine(message)) return // No longer qualifies
 
         LOGGER.debug("Message still qualifies for reaction ${messageId.asString()}")
 
@@ -110,13 +113,15 @@ class DefaultMessageService(
             .getMessageById(channelId, messageId)
             .awaitSingleOrNull() ?: return
 
-        if (!qualifiesForRuleThree(message)) return // No longer qualifies
+        if (!qualifiesForRuleNine(message)) return // No longer qualifies
         LOGGER.debug("Message still qualifies to be deleted ${messageId.asString()}")
 
         message.delete("Violates rule 3 and was not manually deleted before the timeout")
             .doOnError { LOGGER.error("Failed to delete message ${message.id.asString()}", it) }
             .onErrorResume { Mono.empty() }
             .awaitSingleOrNull()
+
+        metricService.incrementMessageDeleted()
     }
 
     override suspend fun doWarningReactionRemoval(messageId: Snowflake, channelId: Snowflake) {
@@ -129,7 +134,7 @@ class DefaultMessageService(
 
         if (!message.reactions.map { it.emoji }.contains(getWarningEmote())) return // Doesn't even have warning emote
 
-        if (qualifiesForRuleThree(message)) return // No reason to remove the reaction
+        if (qualifiesForRuleNine(message)) return // No reason to remove the reaction
 
         trackedMessages.remove(messageId)
         message.removeSelfReaction(getWarningEmote())
@@ -156,7 +161,7 @@ class DefaultMessageService(
 }
 
 interface MessageService {
-    suspend fun qualifiesForRuleThree(message: Message): Boolean
+    suspend fun qualifiesForRuleNine(message: Message): Boolean
 
     suspend fun addToQueue(message: Message)
 

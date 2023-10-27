@@ -20,7 +20,7 @@ class MessageCreateListener(
 
 
     private suspend fun handleRuleThreeEnforcement(event: MessageCreateEvent) {
-        if (messageService.qualifiesForRuleThree(event.message)) {
+        if (messageService.qualifiesForRuleNine(event.message)) {
             LOGGER.debug("Message qualifies for rule 3 enforcement - ${event.message.id.asString()}")
             messageService.addToQueue(event.message)
         }
