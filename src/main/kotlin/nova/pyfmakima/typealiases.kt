@@ -1,4 +1,4 @@
 package nova.pyfmakima
 
 // Cache
-//typealias GuildSettingsCache = CacheRepository<Long, GuildSettings>
+//typealias GuildSettingsCache = CacheRepository<Snowflake, GuildSettings>
