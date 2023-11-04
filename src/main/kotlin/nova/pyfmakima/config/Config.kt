@@ -1,6 +1,7 @@
 package nova.pyfmakima.config
 
 import java.io.FileReader
+import java.time.Instant
 import java.util.*
 
 enum class Config(private val key: String, private var value: Any? = null) {
@@ -47,6 +48,7 @@ enum class Config(private val key: String, private var value: Any? = null) {
     EMOTE_APPROVED_ID("bot.emote.approved.id"),
     EMOTE_APPROVED_NAME("bot.emote.approved.name"),
     EMOTE_APPROVED_ANIMATED("bot.emote.approved.animated"),
+    LEVELING_EPOCH("bot.leveling.epoch"),
     ;
 
     companion object {
@@ -54,7 +56,7 @@ enum class Config(private val key: String, private var value: Any? = null) {
             val props = Properties()
             props.load(FileReader("application.properties"))
 
-            values().forEach { it.value = props.getProperty(it.key, it.value?.toString()) }
+            entries.forEach { it.value = props.getProperty(it.key, it.value?.toString()) }
         }
     }
 
@@ -66,4 +68,6 @@ enum class Config(private val key: String, private var value: Any? = null) {
     fun getLong() = getString().toLong()
 
     fun getBoolean() = getString().toBoolean()
+
+    fun getInstant() = Instant.parse(getString())!!
 }

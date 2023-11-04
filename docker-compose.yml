@@ -1,6 +1,18 @@
 version: "3"
 
 services:
+  mysql:
+    image: mysql:8.0
+    # NOTE: use of "mysql_native_password" is not recommended: https://dev.mysql.com/doc/refman/8.0/en/upgrading-from-previous-series.html#upgrade-caching-sha2-password
+    # This is only for local debugging and development. DO NOT USE IN PRODUCTION!!!!!
+    command: --default-authentication-plugin=mysql_native_password
+    environment:
+      - MYSQL_ROOT_PASSWORD=password
+      - MYSQL_USER=makima
+      - MYSQL_PASSWORD=password
+      - MYSQL_DATABASE=makima
+    restart: unless-stopped
+
   redis:
     image: redis:alpine
     restart: unless-stopped
@@ -15,4 +27,5 @@ services:
       - ./.docker:/makima/bot
     working_dir: /makima/bot
     depends_on:
+      - mysql
       - redis
