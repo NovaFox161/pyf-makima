@@ -1,25 +1,30 @@
 package nova.pyfmakima.config
 
+import com.fasterxml.jackson.databind.ObjectMapper
+import nova.pyfmakima.MessageRecordCache
+import nova.pyfmakima.cache.JdkCacheRepository
+import nova.pyfmakima.cache.RedisStringCacheRepository
+import nova.pyfmakima.extensions.asMinutes
+import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty
+import org.springframework.context.annotation.Bean
 import org.springframework.context.annotation.Configuration
+import org.springframework.context.annotation.Primary
+import org.springframework.data.redis.core.ReactiveStringRedisTemplate
 
 @Configuration
 class CacheConfig {
-    /*
-    //private val settingsTtl = Config.CACHE_TTL_SETTINGS_MINUTES.getLong().asMinutes()
-
-
+    private val messageRecordTtl = Config.CACHE_TTL_MESSAGE_RECORD_MINUTES.getLong().asMinutes()
 
     // Redis caching
     @Bean
     @Primary
     @ConditionalOnProperty("bot.cache.redis", havingValue = "true")
-    fun guildSettingsRedisCache(objectMapper: ObjectMapper, redisTemplate: ReactiveStringRedisTemplate): GuildSettingsCache =
-        RedisStringCacheRepository(objectMapper, redisTemplate, "GuildSettings", settingsTtl)
+    fun messageRecordRedisCache(objectMapper: ObjectMapper, redisTemplate: ReactiveStringRedisTemplate): MessageRecordCache =
+        RedisStringCacheRepository(objectMapper, redisTemplate, "MessageRecords", messageRecordTtl)
 
 
 
     // In-memory fallback caching
     @Bean
-    fun guidSettingsFallbackCache(): GuildSettingsCache = JdkCacheRepository(settingsTtl)
-     */
+    fun messageRecordCache(): MessageRecordCache = JdkCacheRepository(messageRecordTtl)
 }

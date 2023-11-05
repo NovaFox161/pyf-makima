@@ -4,30 +4,43 @@ import discord4j.common.util.Snowflake
 import discord4j.core.GatewayDiscordClient
 import discord4j.core.`object`.entity.Member
 import discord4j.core.`object`.entity.Message
+import discord4j.core.`object`.entity.channel.TextChannel
 import discord4j.core.`object`.reaction.ReactionEmoji
 import discord4j.core.retriever.EntityRetrievalStrategy
 import kotlinx.coroutines.reactive.awaitFirstOrNull
 import kotlinx.coroutines.reactor.awaitSingle
 import kotlinx.coroutines.reactor.awaitSingleOrNull
 import kotlinx.coroutines.reactor.mono
+import nova.pyfmakima.MessageRecordCache
 import nova.pyfmakima.config.Config
+import nova.pyfmakima.database.MessageRecordData
+import nova.pyfmakima.database.MessageRecordRepository
 import nova.pyfmakima.extensions.asSeconds
 import nova.pyfmakima.extensions.extractUrls
 import nova.pyfmakima.extensions.toSnowflake
 import nova.pyfmakima.logger.LOGGER
+import nova.pyfmakima.`object`.MessageRecord
 import org.springframework.stereotype.Component
+import org.springframework.util.CollectionUtils
 import reactor.core.publisher.Mono
 import reactor.kotlin.core.publisher.toFlux
+import java.time.LocalDate
+import java.time.ZoneOffset
 import java.util.concurrent.CopyOnWriteArrayList
 
 @Component
-class DefaultMessageService(
+class MessageService(
+    private val messageRecordRepository: MessageRecordRepository,
+    private val messageRecordCache: MessageRecordCache,
     private val discordClient: GatewayDiscordClient,
     private val metricService: MetricService,
-): MessageService {
+) {
     private val trackedMessages = CopyOnWriteArrayList<Snowflake>()
 
-    override suspend fun qualifiesForRuleNine(message: Message): Boolean {
+    ////////////////////////////////
+    /// Rule 9 message functions ///
+    ////////////////////////////////
+    suspend fun qualifiesForRuleNine(message: Message): Boolean {
         LOGGER.debug("Checking if message ${message.id.asString()} qualifies...")
 
         val monitoredChannels = Config.MESSAGE_DELETE_CHANNEL.getString()
@@ -69,7 +82,7 @@ class DefaultMessageService(
         return false
     }
 
-    override suspend fun addToQueue(message: Message) {
+    suspend fun addToQueue(message: Message) {
         LOGGER.debug("Adding message ${message.id.asString()} to queue")
 
         trackedMessages.add(message.id)
@@ -86,7 +99,7 @@ class DefaultMessageService(
         Mono.`when`(reactMono, deleteMono).awaitSingleOrNull()
     }
 
-    override suspend fun doReaction(messageId: Snowflake, channelId: Snowflake) {
+    suspend fun doReaction(messageId: Snowflake, channelId: Snowflake) {
         LOGGER.debug("Running reaction add task for message ${messageId.asString()}")
 
         val message = discordClient
@@ -103,7 +116,7 @@ class DefaultMessageService(
             .awaitSingleOrNull()
     }
 
-    override suspend fun doDelete(messageId: Snowflake, channelId: Snowflake) {
+    suspend fun doDelete(messageId: Snowflake, channelId: Snowflake) {
         LOGGER.debug("Running delete task for message ${messageId.asString()}")
 
         if (!trackedMessages.contains(messageId)) return
@@ -124,7 +137,7 @@ class DefaultMessageService(
         metricService.incrementMessageDeleted()
     }
 
-    override suspend fun doWarningReactionRemoval(messageId: Snowflake, channelId: Snowflake) {
+    suspend fun doWarningReactionRemoval(messageId: Snowflake, channelId: Snowflake) {
         LOGGER.debug("Running reaction remove task for message ${messageId.asString()}")
 
         val message = discordClient
@@ -143,7 +156,7 @@ class DefaultMessageService(
             .awaitSingleOrNull()
     }
 
-    override fun getWarningEmote(): ReactionEmoji {
+    fun getWarningEmote(): ReactionEmoji {
         val id = Config.EMOTE_WARNING_ID.getLong().toSnowflake()
         val name = Config.EMOTE_WARNING_NAME.getString()
         val animated = Config.EMOTE_WARNING_ANIMATED.getBoolean()
@@ -151,29 +164,63 @@ class DefaultMessageService(
         return ReactionEmoji.custom(id, name, animated)
     }
 
-    override fun getApprovedEmote(): ReactionEmoji {
+    fun getApprovedEmote(): ReactionEmoji {
         val id = Config.EMOTE_APPROVED_ID.getLong().toSnowflake()
         val name = Config.EMOTE_APPROVED_NAME.getString()
         val animated = Config.EMOTE_WARNING_ANIMATED.getBoolean()
 
         return ReactionEmoji.custom(id, name, animated)
     }
+
+    //////////////////////////////////
+    /// Message leveling functions ///
+    //////////////////////////////////
+    suspend fun qualifiesForLeveling(message: Message): Boolean {
+        val ignoredChannels = Config.LEVELING_IGNORED_CHANNELS.getString()
+            .split(",")
+            .filter(String::isNotBlank)
+            .map(Snowflake::of)
+        val trackedRoles = Config.LEVELING_TRACKED_ROLES.getString()
+            .split(",")
+            .filter(String::isNotBlank)
+            .map(Snowflake::of)
+
+        // Filter messages that will never qualify
+        if (!message.guildId.isPresent) return false
+        if (ignoredChannels.contains(message.channelId)) return false
+
+        // Check author requirements
+        val author = message.authorAsMember.awaitSingle()
+        if (author.isBot) return false
+        if (!CollectionUtils.containsAny(author.roleIds, trackedRoles)) return false
+
+
+        // Check if channel is in ignored category
+        val channel = message.channel.ofType(TextChannel::class.java).awaitSingle()
+        if (channel.categoryId.map(ignoredChannels::contains).orElse(false)) return false
+
+        return true
+    }
+
+    ////////////////////////////////
+    /// Message Record functions ///
+    ////////////////////////////////
+    suspend fun recordMessage(message: Message): MessageRecord {
+        LOGGER.debug("Creating message record for message ${message.id.asString()}")
+
+        val messageRecord = messageRecordRepository.save(MessageRecordData(
+            messageId = message.id.asLong(),
+            guildId = message.guildId.get().asLong(),
+            memberId = message.authorAsMember.awaitSingle().id.asLong(),
+            channelId = message.channelId.asLong(),
+            wordCount = message.content.trim().split(regex = Regex("\\s+")).size,
+            dayBucket = LocalDate.ofInstant(message.timestamp, ZoneOffset.UTC)
+        )).map(::MessageRecord).awaitSingle()
+
+        messageRecordCache.put(message.guildId.get(), key = message.id, messageRecord)
+
+        return messageRecord
+    }
+
+    // TODO: Need to make the required stuffs
 }
-
-interface MessageService {
-    suspend fun qualifiesForRuleNine(message: Message): Boolean
-
-    suspend fun addToQueue(message: Message)
-
-    suspend fun doReaction(messageId: Snowflake, channelId: Snowflake)
-
-    suspend fun doDelete(messageId: Snowflake, channelId: Snowflake)
-
-    suspend fun doWarningReactionRemoval(messageId: Snowflake, channelId: Snowflake)
-
-    fun getWarningEmote(): ReactionEmoji
-
-    fun getApprovedEmote(): ReactionEmoji
-}
-
-

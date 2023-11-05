@@ -15,14 +15,24 @@ class MessageCreateListener(
         get() = beanFactory.getBean()
 
     override suspend fun handle(event: MessageCreateEvent) {
-        handleRuleThreeEnforcement(event)
+        handleRuleNineEnforcement(event)
+        handleLeveling(event)
     }
 
 
-    private suspend fun handleRuleThreeEnforcement(event: MessageCreateEvent) {
+    private suspend fun handleRuleNineEnforcement(event: MessageCreateEvent) {
         if (messageService.qualifiesForRuleNine(event.message)) {
             LOGGER.debug("Message qualifies for rule 3 enforcement - ${event.message.id.asString()}")
             messageService.addToQueue(event.message)
         }
+    }
+
+    private suspend fun handleLeveling(event: MessageCreateEvent) {
+        if (messageService.qualifiesForLeveling(event.message)) {
+            LOGGER.debug("Message qualifies for leveling - ${event.message.id.asString()}")
+            messageService.recordMessage(event.message)
+            // TODO: Call level service to calculate xp and update user's level
+        }
+
     }
 }

@@ -16,6 +16,7 @@ enum class Config(private val key: String, private var value: Any? = null) {
     CACHE_USE_REDIS("bot.cache.redis", false),
     CACHE_PREFIX("bot.cache.prefix", "makima"),
     CACHE_TTL_SETTINGS_MINUTES("bot.cache.ttl-minutes.settings", 60),
+    CACHE_TTL_MESSAGE_RECORD_MINUTES("bot.cache.ttl-minutes.message-record", 60),
 
     // Global bot timings
     TIMING_MESSAGE_REACT_SECONDS("bot.timing.message-react.seconds", 60),
@@ -39,6 +40,7 @@ enum class Config(private val key: String, private var value: Any? = null) {
     LOGGING_WEBHOOKS_USE("bot.logging.webhooks.use", false),
     LOGGING_WEBHOOKS_ALL_ERRORS("bot.logging.webhooks.all-errors", false),
 
+    // Rule 9 enforcement
     MESSAGE_DELETE_CHANNEL("bot.message-delete.channel"),
     MESSAGE_DELETE_REACTION_ROLE("bot.message-delete.reaction-role"),
 
@@ -48,7 +50,12 @@ enum class Config(private val key: String, private var value: Any? = null) {
     EMOTE_APPROVED_ID("bot.emote.approved.id"),
     EMOTE_APPROVED_NAME("bot.emote.approved.name"),
     EMOTE_APPROVED_ANIMATED("bot.emote.approved.animated"),
+
+    // Leveling
     LEVELING_EPOCH("bot.leveling.epoch"),
+
+    LEVELING_IGNORED_CHANNELS("bot.leveling.ignored-channels"),
+    LEVELING_TRACKED_ROLES("bot.leveling.tracked-roles"),
     ;
 
     companion object {

@@ -76,4 +76,14 @@ class LevelService(
     fun calculateExperienceGainedFromMessage() {
         TODO("Not yet implemented")
     }
+
+    ////////////////////////////
+    /// User Level functions ///
+    ////////////////////////////
+    // TODO: add CRUD methods for UserLevel object
+
+
+    //////////////////////////////
+    /// Level action functions ///
+    //////////////////////////////
 }
