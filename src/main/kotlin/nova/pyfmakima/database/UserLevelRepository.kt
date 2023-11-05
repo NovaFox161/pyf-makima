@@ -5,7 +5,9 @@ import org.springframework.data.r2dbc.repository.R2dbcRepository
 import reactor.core.publisher.Mono
 
 interface UserLevelRepository : R2dbcRepository<UserLevelData, Long> {
-    fun findByGuildIdAndMemberId(guildId: Long, memberId: Long): Mono<MessageRecordData>
+    fun existsByGuildIdAndMemberId(guildId: Long, memberId: Long): Mono<Boolean>
+
+    fun findByGuildIdAndMemberId(guildId: Long, memberId: Long): Mono<UserLevelData>
 
     @Query("""
         UPDATE user_levels

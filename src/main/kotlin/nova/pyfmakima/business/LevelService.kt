@@ -1,8 +1,15 @@
 package nova.pyfmakima.business
 
+import discord4j.common.util.Snowflake
 import discord4j.core.GatewayDiscordClient
 import discord4j.core.`object`.entity.Member
+import kotlinx.coroutines.reactor.awaitSingle
+import kotlinx.coroutines.reactor.awaitSingleOrNull
+import nova.pyfmakima.UserLevelCache
 import nova.pyfmakima.config.Config
+import nova.pyfmakima.database.UserLevelData
+import nova.pyfmakima.database.UserLevelRepository
+import nova.pyfmakima.`object`.UserLevel
 import org.springframework.stereotype.Component
 import java.time.Duration
 import java.time.Instant
@@ -13,6 +20,9 @@ import kotlin.math.pow
 
 @Component
 class LevelService(
+    private val messageService: MessageService,
+    private val userLevelRepository: UserLevelRepository,
+    private val userLevelCache: UserLevelCache,
     private val discordClient: GatewayDiscordClient,
 ) {
     /////////////////////////////
@@ -53,7 +63,7 @@ class LevelService(
         return min(1.0f, daysInServer / 90f)
     }
 
-    fun calculateConsistencyScore(member: Member): Float {
+    suspend fun calculateConsistencyScore(member: Member): Float {
         // consistency_score = if (daysInServer == 0) 0.0 else min(1.0, daysActive.toDouble() / daysInServer)
 
         /*
@@ -68,7 +78,7 @@ class LevelService(
         if(boundedDaysInServer == 0L) return 0f
 
         // Calculate days active
-        val daysActive = 0 // TODO: Implement
+        val daysActive = messageService.getDaysActive(member.guildId, member.id)
 
         return min(1f, daysActive.toFloat() / boundedDaysInServer.toFloat())
     }
@@ -80,10 +90,39 @@ class LevelService(
     ////////////////////////////
     /// User Level functions ///
     ////////////////////////////
-    // TODO: add CRUD methods for UserLevel object
+    suspend fun getUserLevel(guildId: Snowflake, memberId: Snowflake): UserLevel {
+        var level = userLevelCache.get(guildId, memberId)
+        if (level != null) return level
+
+        level = userLevelRepository.findByGuildIdAndMemberId(guildId.asLong(), memberId.asLong())
+            .map(::UserLevel)
+            .awaitSingleOrNull() ?: UserLevel(guildId, memberId, 0f)
+
+        userLevelCache.put(guildId, memberId, level)
+        return level
+    }
+
+    suspend fun upsertUserLevel(userLevel: UserLevel) {
+        if (userLevelRepository.existsByGuildIdAndMemberId(userLevel.guildId.asLong(), userLevel.memberId.asLong()).awaitSingle()) {
+            userLevelRepository.updateByGuildIdAndMemberId(
+                guildId = userLevel.guildId.asLong(),
+                memberId = userLevel.memberId.asLong(),
+                xp = userLevel.xp,
+            ).awaitSingleOrNull()
+        } else {
+            userLevelRepository.save(UserLevelData(
+                guildId = userLevel.guildId.asLong(),
+                memberId = userLevel.memberId.asLong(),
+                xp = userLevel.xp,
+            )).awaitSingleOrNull()
+        }
+
+        userLevelCache.put(userLevel.guildId, userLevel.memberId, userLevel)
+    }
 
 
     //////////////////////////////
     /// Level action functions ///
     //////////////////////////////
+
 }

@@ -11,6 +11,7 @@ import kotlinx.coroutines.reactive.awaitFirstOrNull
 import kotlinx.coroutines.reactor.awaitSingle
 import kotlinx.coroutines.reactor.awaitSingleOrNull
 import kotlinx.coroutines.reactor.mono
+import nova.pyfmakima.DaysActiveCache
 import nova.pyfmakima.MessageRecordCache
 import nova.pyfmakima.config.Config
 import nova.pyfmakima.database.MessageRecordData
@@ -32,6 +33,7 @@ import java.util.concurrent.CopyOnWriteArrayList
 class MessageService(
     private val messageRecordRepository: MessageRecordRepository,
     private val messageRecordCache: MessageRecordCache,
+    private val daysActiveCache: DaysActiveCache,
     private val discordClient: GatewayDiscordClient,
     private val metricService: MetricService,
 ) {
@@ -220,6 +222,18 @@ class MessageService(
         messageRecordCache.put(message.guildId.get(), key = message.id, messageRecord)
 
         return messageRecord
+    }
+
+    suspend fun getDaysActive(guildId: Snowflake, memberId: Snowflake): Long {
+        var daysActive = daysActiveCache.get(guildId, memberId)
+        if (daysActive != null) return daysActive
+
+        daysActive = messageRecordRepository.countDistinctByMemberIdAndGuildId(memberId = memberId.asLong(), guildId = guildId.asLong())
+            .awaitSingleOrNull() ?: 0
+
+        daysActiveCache.put(guildId, memberId, daysActive)
+
+        return daysActive
     }
 
     // TODO: Need to make the required stuffs
