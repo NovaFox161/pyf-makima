@@ -13,7 +13,7 @@ interface MessageRecordRepository : R2dbcRepository<MessageRecordData, Long> {
             WHERE member_id = :memberId
             AND guild_id = :guildId
     """)
-    fun countDistinctByMemberIdAndGuildId(memberId: Long, guildId: Long): Mono<Long>
+    fun countDaysActiveByMemberIdAndGuildId(memberId: Long, guildId: Long): Mono<Long>
 
-    // TODO: Need to make the required stuffs
+    fun countByMemberIdAndGuildIdAndMessageIdGreaterThanEqualAndMessageIdLessThanEqual(memberId: Long, guildId: Long, startMessageId: Long, endMessageId: Long): Mono<Long>
 }

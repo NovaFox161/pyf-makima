@@ -3,6 +3,7 @@ package nova.pyfmakima.business
 import discord4j.common.util.Snowflake
 import discord4j.core.GatewayDiscordClient
 import discord4j.core.`object`.entity.Member
+import discord4j.core.`object`.entity.Message
 import kotlinx.coroutines.reactor.awaitSingle
 import kotlinx.coroutines.reactor.awaitSingleOrNull
 import nova.pyfmakima.UserLevelCache
@@ -51,8 +52,16 @@ class LevelService(
         return min(1.0f, max(0.1f, wordCount.toFloat() / wordCountDividerConstant))
     }
 
-    fun calculateRateScore() {
-        TODO("Not yet implemented")
+    suspend fun calculateRateScore(member: Member): Float {
+        val messagesPerHour = messageService.getMessagesPerHour(
+            guildId = member.guildId,
+            memberId = member.id,
+            start = Instant.now().minus(Duration.ofHours(48))
+        )
+
+        return if (messagesPerHour < 0.1) 0f
+        else if (messagesPerHour <= 3) min(1.0f, messagesPerHour / 3f)
+        else 1.0f - min(1.0f, (messagesPerHour - 3) / 6)
     }
 
     fun calculateLongevityScore(member: Member): Float {
@@ -83,8 +92,15 @@ class LevelService(
         return min(1f, daysActive.toFloat() / boundedDaysInServer.toFloat())
     }
 
-    fun calculateExperienceGainedFromMessage() {
-        TODO("Not yet implemented")
+    suspend fun calculateExperienceGainedFromMessage(message: Message): Float {
+        val author = message.authorAsMember.awaitSingle()
+
+        val lengthScore = calculateLengthScore(message.content)
+        val rateScore = calculateRateScore(author)
+        val longevityScore = calculateLongevityScore(author)
+        val consistencyScore = calculateConsistencyScore(author)
+
+        return (lengthScore * rateScore * (longevityScore + consistencyScore) * 5)
     }
 
     ////////////////////////////

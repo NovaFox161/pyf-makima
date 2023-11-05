@@ -25,6 +25,8 @@ import org.springframework.stereotype.Component
 import org.springframework.util.CollectionUtils
 import reactor.core.publisher.Mono
 import reactor.kotlin.core.publisher.toFlux
+import java.time.Duration
+import java.time.Instant
 import java.time.LocalDate
 import java.time.ZoneOffset
 import java.util.concurrent.CopyOnWriteArrayList
@@ -228,13 +230,29 @@ class MessageService(
         var daysActive = daysActiveCache.get(guildId, memberId)
         if (daysActive != null) return daysActive
 
-        daysActive = messageRecordRepository.countDistinctByMemberIdAndGuildId(memberId = memberId.asLong(), guildId = guildId.asLong())
-            .awaitSingleOrNull() ?: 0
+        daysActive = messageRecordRepository.countDaysActiveByMemberIdAndGuildId(
+            memberId = memberId.asLong(),
+            guildId = guildId.asLong()
+        ).awaitSingleOrNull() ?: 0
 
         daysActiveCache.put(guildId, memberId, daysActive)
 
         return daysActive
     }
 
-    // TODO: Need to make the required stuffs
+    suspend fun getMessagesPerHour(guildId: Snowflake, memberId: Snowflake, start: Instant, end: Instant = Instant.now()): Float {
+        val lookbackStart = Snowflake.of(start)
+        val lookbackEnd = Snowflake.of(end)
+        val lookbackWindow = Duration.between(start, end).toHours()
+
+        val totalMessages = messageRecordRepository.countByMemberIdAndGuildIdAndMessageIdGreaterThanEqualAndMessageIdLessThanEqual(
+            memberId = memberId.asLong(),
+            guildId = guildId.asLong(),
+            startMessageId = lookbackStart.asLong(),
+            endMessageId = lookbackEnd.asLong()
+        ).awaitSingleOrNull() ?: 0
+
+        // Average messages per hour over the lookback window
+        return totalMessages.toFloat() / lookbackWindow.toFloat()
+    }
 }
