@@ -245,6 +245,7 @@ class MessageService(
         val lookbackEnd = Snowflake.of(end)
         val lookbackWindow = Duration.between(start, end).toHours()
 
+        // TODO: I wonder if there's a way to cache this kind of thing
         val totalMessages = messageRecordRepository.countByMemberIdAndGuildIdAndMessageIdGreaterThanEqualAndMessageIdLessThanEqual(
             memberId = memberId.asLong(),
             guildId = guildId.asLong(),

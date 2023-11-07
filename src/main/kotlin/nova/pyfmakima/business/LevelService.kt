@@ -1,7 +1,6 @@
 package nova.pyfmakima.business
 
 import discord4j.common.util.Snowflake
-import discord4j.core.GatewayDiscordClient
 import discord4j.core.`object`.entity.Member
 import discord4j.core.`object`.entity.Message
 import kotlinx.coroutines.reactor.awaitSingle
@@ -18,22 +17,22 @@ import kotlin.jvm.optionals.getOrDefault
 import kotlin.math.max
 import kotlin.math.min
 import kotlin.math.pow
+import kotlin.math.sqrt
 
 @Component
 class LevelService(
     private val messageService: MessageService,
     private val userLevelRepository: UserLevelRepository,
     private val userLevelCache: UserLevelCache,
-    private val discordClient: GatewayDiscordClient,
 ) {
     /////////////////////////////
     /// Calculation functions ///
     /////////////////////////////
-    fun calculateXpToReachLevel(level: Int): Double {
+    fun calculateXpToReachLevel(level: Int): Float {
         // Chosen to provide balance between making early levels easy to achieve and higher levels more challenging.
         val quadraticCoefficient = 100
         // Ensures that the experience required for each level increases more steeply as the level goes up
-        val quadraticTerm = quadraticCoefficient * level.toDouble().pow(2)
+        val quadraticTerm = quadraticCoefficient * level.toFloat().pow(2)
 
         // Chosen to create a smoother leveling experience
         val linearCoefficient = 30
@@ -42,6 +41,10 @@ class LevelService(
         val linearTerm = linearCoefficient * level
 
         return quadraticTerm + linearTerm + 40 // 40 is a good starting place for the quadratic line for xp
+    }
+
+    fun calculateLevelFromXp(xp: Float): Int {
+        return ((30 + sqrt(900 + 400 * (xp - 40))) / 200).toInt()
     }
 
     fun calculateLengthScore(message: String): Float {
@@ -136,9 +139,22 @@ class LevelService(
         userLevelCache.put(userLevel.guildId, userLevel.memberId, userLevel)
     }
 
-
     //////////////////////////////
     /// Level action functions ///
     //////////////////////////////
+    suspend fun handleQualifyingMessage(message: Message) {
+        val author = message.authorAsMember.awaitSingle()
+        val userLevel = getUserLevel(message.guildId.get(), author.id)
+        val currentLevel = calculateLevelFromXp(userLevel.xp)
 
+        val xpGained = calculateExperienceGainedFromMessage(message)
+        val newLevel = calculateLevelFromXp(userLevel.xp + xpGained)
+
+        if (newLevel > currentLevel) {
+            TODO("Add handling for level up")
+        }
+
+        upsertUserLevel(userLevel.copy(xp = userLevel.xp + xpGained))
+    }
 }
+
