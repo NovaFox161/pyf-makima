@@ -56,8 +56,8 @@ enum class Config(private val key: String, private var value: Any? = null) {
     // Leveling
     LEVELING_EPOCH("bot.leveling.epoch"),
 
-    LEVELING_IGNORED_CHANNELS("bot.leveling.ignored-channels"),
-    LEVELING_TRACKED_ROLES("bot.leveling.tracked-roles"),
+    LEVELING_IGNORED_CHANNELS("bot.leveling.ignored-channels", ""),
+    LEVELING_TRACKED_ROLES("bot.leveling.tracked-roles", ""),
     ;
 
     companion object {

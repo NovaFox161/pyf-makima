@@ -11,9 +11,10 @@ import org.springframework.stereotype.Component
 @Component
 class MessageCreateListener(
     private val beanFactory: BeanFactory,
-    private val levelService: LevelService,
 ): EventListener<MessageCreateEvent> {
     private val messageService: MessageService
+        get() = beanFactory.getBean()
+    private val levelService: LevelService
         get() = beanFactory.getBean()
 
     override suspend fun handle(event: MessageCreateEvent) {
