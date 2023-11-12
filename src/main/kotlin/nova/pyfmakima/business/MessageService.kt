@@ -261,4 +261,11 @@ class MessageService(
         // Average messages per hour over the lookback window
         return totalMessages.toFloat() / lookbackWindow.toFloat()
     }
+
+    suspend fun getTotalMessages(guildId: Snowflake, memberId: Snowflake): Long {
+        return messageRecordRepository.countByGuildIdAndMemberId(
+            guildId = guildId.asLong(),
+            memberId = memberId.asLong()
+        ).awaitSingle()
+    }
 }

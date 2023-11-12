@@ -16,6 +16,22 @@ interface UserLevelRepository : R2dbcRepository<UserLevelData, Long> {
     fun countByGuildId(guildId: Long): Mono<Long>
 
     @Query("""
+        SET @rank = 0;
+
+        SELECT calculatedRank
+        FROM
+          ( SELECT
+              @rank := @rank + 1 calculatedRank,
+              member_id
+            FROM user_levels
+            WHERE guild_id = :guildId
+            ORDER BY xp DESC
+          ) r
+        WHERE r.member_id = :memberId;
+    """)
+    fun calculateRankByGuildIdAndMemberId(guildId: Long, memberId: Long): Mono<Long>
+
+    @Query("""
         UPDATE user_levels
         SET xp = :xp
         WHERE guild_id = :guildId 

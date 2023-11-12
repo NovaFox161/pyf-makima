@@ -151,6 +151,10 @@ class LevelService(
         return userLevelRepository.countByGuildId(guildId.asLong()).awaitSingle()
     }
 
+    suspend fun getCurrentRank(guildId: Snowflake, memberId: Snowflake): Long {
+        return userLevelRepository.calculateRankByGuildIdAndMemberId(guildId. asLong(), memberId.asLong()).awaitSingle()
+    }
+
 
 
     //////////////////////////////

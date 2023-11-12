@@ -16,4 +16,6 @@ interface MessageRecordRepository : R2dbcRepository<MessageRecordData, Long> {
     fun countDaysActiveByMemberIdAndGuildId(memberId: Long, guildId: Long): Mono<Long>
 
     fun countByMemberIdAndGuildIdAndMessageIdGreaterThanEqualAndMessageIdLessThanEqual(memberId: Long, guildId: Long, startMessageId: Long, endMessageId: Long): Mono<Long>
+
+    fun countByGuildIdAndMemberId(guildId: Long, memberId: Long): Mono<Long>
 }
