@@ -9,6 +9,7 @@ import nova.pyfmakima.utils.GlobalValues.iconUrl
 import org.springframework.stereotype.Component
 import java.math.RoundingMode
 import java.text.DecimalFormat
+import java.time.Duration
 import java.time.Instant
 import kotlin.math.ceil
 
@@ -59,6 +60,12 @@ class EmbedService(
         val currentLongevityScore = levelService.calculateLongevityScore(member)
         val currentConsistencyScore = levelService.calculateConsistencyScore(member)
         val totalTrackedMessages = messageService.getTotalMessages(member.guildId, member.id)
+        val daysActive = messageService.getDaysActive(member.guildId, member.id)
+        val messagePerHour = messageService.getMessagesPerHour(
+            member.guildId,
+            member.id,
+            start = Instant.now().minus(Duration.ofHours(48))
+        )
 
 
         return EmbedCreateSpec.builder()
@@ -70,8 +77,10 @@ class EmbedService(
             .addField("Progress", generateXpProgressBar(userLevel.xp, xpToNextLevel), false)
             .addField("Rate Score", "`$currentRateScore`", true)
             .addField("Longevity Score", "`$currentLongevityScore`", true)
-            .addField("Consistency Score", "`$currentConsistencyScore`", true)
+            .addField("Consistency Score", "`$currentConsistencyScore`", false)
             .addField("Average XP Per Message", "`${userLevel.xp / totalTrackedMessages}`", true)
+            .addField("Days Active", "`$daysActive`", true)
+            .addField("Messages Per Hour (last 48 hours)", "`$messagePerHour`", false)
             .thumbnail(member.effectiveAvatarUrl)
             .timestamp(Instant.now())
             .build()
