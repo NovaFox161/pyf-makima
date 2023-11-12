@@ -4,6 +4,7 @@ import discord4j.common.util.Snowflake
 import nova.pyfmakima.database.MessageRecordData
 import nova.pyfmakima.extensions.toSnowflake
 import java.time.Instant
+import java.time.ZoneOffset
 
 data class MessageRecord(
     val messageId: Snowflake,
@@ -19,6 +20,6 @@ data class MessageRecord(
         memberId = data.memberId.toSnowflake(),
         channelId = data.channelId.toSnowflake(),
         wordCount = data.wordCount,
-        dayBucket = Instant.from(data.dayBucket.atStartOfDay()),
+        dayBucket = data.dayBucket.atStartOfDay().toInstant(ZoneOffset.UTC),
     )
 }
