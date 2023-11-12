@@ -18,13 +18,16 @@ class EmbedService(
     private val messageService: MessageService,
 ) {
     private val leaderboardPageSize = 20
+    private val xpFormat = DecimalFormat("#.##")
+
+    init {
+        xpFormat.roundingMode = RoundingMode.CEILING
+    }
 
     suspend fun generateLevelLeaderboardEmbed(guild: Guild, page: Int): EmbedCreateSpec {
         val leaders = levelService.getTopUsers(guild.id, page, leaderboardPageSize)
         val totalRecords = levelService.getTotalLeveledUserCount(guild.id)
         val formattedLeaderboard = StringBuilder()
-        val xpFormat = DecimalFormat("#.##")
-        xpFormat.roundingMode = RoundingMode.CEILING
 
         leaders.forEachIndexed { index, userLevel ->
             val level = levelService.calculateLevelFromXp(userLevel.xp)
@@ -63,7 +66,7 @@ class EmbedService(
             .color(embedColor)
             .title("${member.displayName} - Rank #$currentRank")
             .addField("Level", "*$currentLevel*", true)
-            .addField("XP", "${userLevel.xp}/$xpToNextLevel", true)
+            .addField("XP", "`${xpFormat.format(userLevel.xp)}/${xpToNextLevel.toInt()}`", true)
             .addField("Progress", generateXpProgressBar(userLevel.xp, xpToNextLevel), false)
             .addField("Rate Score", "`$currentRateScore`", true)
             .addField("Longevity Score", "`$currentLongevityScore`", true)
@@ -75,14 +78,15 @@ class EmbedService(
     }
 
     private fun generateXpProgressBar(currentXp: Float, xpToNextLevel: Float): String {
-        val progressBarLength = 20
+        val progressBarLength = 10
         val progressBarFill = ceil((currentXp / xpToNextLevel) * progressBarLength).toInt()
 
         return StringBuilder()
-            .append("[")
-            .append("▰".repeat(progressBarFill))
-            .append("▱".repeat(progressBarLength - progressBarFill))
-            .append("]")
+            .append("`")
+            .append("■".repeat(progressBarFill))
+            .append("□".repeat(progressBarLength - progressBarFill))
+            .append("` ")
+            .append("${(currentXp / xpToNextLevel * 100).toInt()}%")
             .toString()
     }
 }
