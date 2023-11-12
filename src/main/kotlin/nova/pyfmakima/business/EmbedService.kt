@@ -29,7 +29,7 @@ class EmbedService(
             formattedLeaderboard
                 .append("${index + 1}. ")
                 .append("<@${userLevel.memberId.asString()}> ")
-                .append(xpFormat.format(userLevel.xp))
+                .append("${xpFormat.format(userLevel.xp)} ")
                 .append("lvl $level")
                 .appendLine()
         }
