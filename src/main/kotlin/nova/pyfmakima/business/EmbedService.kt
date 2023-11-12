@@ -24,8 +24,8 @@ class EmbedService(
             val level = levelService.calculateLevelFromXp(userLevel.xp)
             formattedLeaderboard
                 .append("${index + 1}. ")
-                .append("<@${userLevel.memberId}> ")
-                .append("${userLevel.xp} ")
+                .append("<@${userLevel.memberId.asString()}> ")
+                .append("${userLevel.xp.toDouble()} ")
                 .append("lvl $level")
                 .appendLine()
         }
