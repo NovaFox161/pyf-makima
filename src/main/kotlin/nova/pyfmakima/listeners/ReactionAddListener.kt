@@ -4,16 +4,12 @@ import discord4j.core.event.domain.message.ReactionAddEvent
 import nova.pyfmakima.business.MessageService
 import nova.pyfmakima.config.Config
 import nova.pyfmakima.extensions.toSnowflake
-import org.springframework.beans.factory.BeanFactory
-import org.springframework.beans.factory.getBean
 import org.springframework.stereotype.Component
 
 @Component
 class ReactionAddListener(
-    private val beanFactory: BeanFactory,
-): EventListener<ReactionAddEvent> {
     private val messageService: MessageService
-        get() = beanFactory.getBean()
+): EventListener<ReactionAddEvent> {
 
     private val requiredRole = Config.MESSAGE_DELETE_REACTION_ROLE.getLong().toSnowflake()
 

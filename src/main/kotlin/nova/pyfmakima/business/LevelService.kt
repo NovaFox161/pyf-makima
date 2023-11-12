@@ -10,6 +10,7 @@ import nova.pyfmakima.config.Config
 import nova.pyfmakima.database.UserLevelData
 import nova.pyfmakima.database.UserLevelRepository
 import nova.pyfmakima.`object`.UserLevel
+import org.springframework.data.domain.Pageable
 import org.springframework.stereotype.Component
 import java.time.Duration
 import java.time.Instant
@@ -138,6 +139,19 @@ class LevelService(
 
         userLevelCache.put(userLevel.guildId, userLevel.memberId, userLevel)
     }
+
+    suspend fun getTopUsers(guildId: Snowflake, page: Int, pageSize: Int): List<UserLevel> {
+        return userLevelRepository.findAllByGuildIdOrderByXpDesc(guildId.asLong(), Pageable.ofSize(pageSize).withPage(page))
+            .map(::UserLevel)
+            .collectList()
+            .awaitSingle()
+    }
+
+    suspend fun getTotalLeveledUserCount(guildId: Snowflake): Long {
+        return userLevelRepository.countByGuildId(guildId.asLong()).awaitSingle()
+    }
+
+
 
     //////////////////////////////
     /// Level action functions ///

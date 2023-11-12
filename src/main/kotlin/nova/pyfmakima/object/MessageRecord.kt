@@ -19,6 +19,6 @@ data class MessageRecord(
         memberId = data.memberId.toSnowflake(),
         channelId = data.channelId.toSnowflake(),
         wordCount = data.wordCount,
-        dayBucket = Instant.from(data.dayBucket),
+        dayBucket = Instant.from(data.dayBucket.atStartOfDay()),
     )
 }

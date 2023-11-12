@@ -21,6 +21,8 @@ import nova.pyfmakima.extensions.extractUrls
 import nova.pyfmakima.extensions.toSnowflake
 import nova.pyfmakima.logger.LOGGER
 import nova.pyfmakima.`object`.MessageRecord
+import org.springframework.beans.factory.BeanFactory
+import org.springframework.beans.factory.getBean
 import org.springframework.stereotype.Component
 import org.springframework.util.CollectionUtils
 import reactor.core.publisher.Mono
@@ -36,9 +38,12 @@ class MessageService(
     private val messageRecordRepository: MessageRecordRepository,
     private val messageRecordCache: MessageRecordCache,
     private val daysActiveCache: DaysActiveCache,
-    private val discordClient: GatewayDiscordClient,
     private val metricService: MetricService,
+    private val beanFactory: BeanFactory,
 ) {
+    private val discordClient: GatewayDiscordClient
+        get() = beanFactory.getBean()
+
     private val trackedMessages = CopyOnWriteArrayList<Snowflake>()
 
     ////////////////////////////////

@@ -4,18 +4,13 @@ import discord4j.core.event.domain.message.MessageCreateEvent
 import nova.pyfmakima.business.LevelService
 import nova.pyfmakima.business.MessageService
 import nova.pyfmakima.logger.LOGGER
-import org.springframework.beans.factory.BeanFactory
-import org.springframework.beans.factory.getBean
 import org.springframework.stereotype.Component
 
 @Component
 class MessageCreateListener(
-    private val beanFactory: BeanFactory,
+    private val messageService: MessageService,
+    private val levelService: LevelService,
 ): EventListener<MessageCreateEvent> {
-    private val messageService: MessageService
-        get() = beanFactory.getBean()
-    private val levelService: LevelService
-        get() = beanFactory.getBean()
 
     override suspend fun handle(event: MessageCreateEvent) {
         handleRuleNineEnforcement(event)
