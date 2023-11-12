@@ -1,0 +1,5 @@
+{
+  "name": "leaderboard",
+  "description": "Shows the top XP earners in the server",
+  "dm_permission": false
+}

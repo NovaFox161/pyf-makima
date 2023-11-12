@@ -122,6 +122,6 @@ class DiscordConfig {
         Intent.DIRECT_MESSAGES,
         Intent.DIRECT_MESSAGE_REACTIONS,
         Intent.GUILD_MEMBERS,
-        Intent.GUILD_EMOJIS,
+        Intent.GUILD_EMOJIS_AND_STICKERS,
     )
 }
