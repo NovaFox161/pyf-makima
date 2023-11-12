@@ -152,10 +152,9 @@ class LevelService(
     }
 
     suspend fun getCurrentRank(guildId: Snowflake, memberId: Snowflake): Long {
-        return userLevelRepository.calculateRankByGuildIdAndMemberId(guildId. asLong(), memberId.asLong()).awaitSingle()
+        return userLevelRepository.calculateRankByGuildIdAndMemberId(guildId. asLong(), memberId.asLong())
+            .awaitSingleOrNull() ?: -1
     }
-
-
 
     //////////////////////////////
     /// Level action functions ///

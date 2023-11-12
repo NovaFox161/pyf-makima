@@ -199,7 +199,7 @@ class MessageService(
         if (ignoredChannels.contains(message.channelId)) return false
 
         // Check author requirements
-        val author = message.authorAsMember.awaitSingle()
+        val author = message.authorAsMember.awaitSingleOrNull() ?: return false
         if (author.isBot) return false
         if (trackedRoles.isNotEmpty() && !CollectionUtils.containsAny(author.roleIds, trackedRoles)) return false
 
