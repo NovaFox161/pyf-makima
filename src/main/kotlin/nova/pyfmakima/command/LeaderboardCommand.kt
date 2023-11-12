@@ -17,7 +17,7 @@ class LeaderboardCommand(
         val guild = event.interaction.guild.awaitSingle()
 
         event.createFollowup()
-            .withEmbeds(embedService.generateLevelLeaderboardEmbed(guild, page = 1))
+            .withEmbeds(embedService.generateLevelLeaderboardEmbed(guild, page = 0))
             // TODO: Add buttons for pagination
             .awaitSingleOrNull()
     }

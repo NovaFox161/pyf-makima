@@ -35,7 +35,7 @@ class EmbedService(
             .color(embedColor)
             .title("Leaderboard for ${guild.name}".embedTitleSafe())
             .description(formattedLeaderboard.toString())
-            .footer("Page $page/${ceil(totalRecords / leaderboardPageSize.toDouble())}", null)
+            .footer("Page $page/${ceil(totalRecords / leaderboardPageSize.toDouble()).toInt()}", null)
             .timestamp(Instant.now())
             .build()
     }
