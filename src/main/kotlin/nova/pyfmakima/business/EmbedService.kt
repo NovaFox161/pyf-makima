@@ -6,6 +6,8 @@ import nova.pyfmakima.extensions.embedTitleSafe
 import nova.pyfmakima.utils.GlobalValues.embedColor
 import nova.pyfmakima.utils.GlobalValues.iconUrl
 import org.springframework.stereotype.Component
+import java.math.RoundingMode
+import java.text.DecimalFormat
 import java.time.Instant
 import kotlin.math.ceil
 
@@ -19,13 +21,15 @@ class EmbedService(
         val leaders = levelService.getTopUsers(guild.id, page, leaderboardPageSize)
         val totalRecords = levelService.getTotalLeveledUserCount(guild.id)
         val formattedLeaderboard = StringBuilder()
+        val xpFormat = DecimalFormat("#.##")
+        xpFormat.roundingMode = RoundingMode.CEILING
 
         leaders.forEachIndexed { index, userLevel ->
             val level = levelService.calculateLevelFromXp(userLevel.xp)
             formattedLeaderboard
                 .append("${index + 1}. ")
                 .append("<@${userLevel.memberId.asString()}> ")
-                .append("${userLevel.xp.toDouble()} ")
+                .append(xpFormat.format(userLevel.xp))
                 .append("lvl $level")
                 .appendLine()
         }
@@ -35,7 +39,7 @@ class EmbedService(
             .color(embedColor)
             .title("Leaderboard for ${guild.name}".embedTitleSafe())
             .description(formattedLeaderboard.toString())
-            .footer("Page $page/${ceil(totalRecords / leaderboardPageSize.toDouble()).toInt()}", null)
+            .footer("Page ${page + 1}/${ceil(totalRecords / leaderboardPageSize.toDouble()).toInt()}", null)
             .timestamp(Instant.now())
             .build()
     }
