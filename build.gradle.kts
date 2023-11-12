@@ -26,7 +26,7 @@ buildscript {
 val makimaVersion = "1.0.5"
 val gradleWrapperVersion = "8.2.1"
 val javaVersion = "19"
-val d4jVersion = "3.2.6"
+val d4jVersion = "3.3.0-M2"
 val d4jStoresVersion = "3.2.2"
 val discordWebhooksVersion = "0.8.4"
 val mySqlConnectorVersion = "8.0.33"
