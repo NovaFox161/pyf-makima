@@ -75,7 +75,7 @@ class EmbedService(
     }
 
     private fun generateXpProgressBar(currentXp: Float, xpToNextLevel: Float): String {
-        val progressBarLength = 15
+        val progressBarLength = 20
         val progressBarFill = ceil((currentXp / xpToNextLevel) * progressBarLength).toInt()
 
         return StringBuilder()
