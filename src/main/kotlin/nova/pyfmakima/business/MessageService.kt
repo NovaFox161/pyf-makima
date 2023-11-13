@@ -4,6 +4,7 @@ import discord4j.common.util.Snowflake
 import discord4j.core.GatewayDiscordClient
 import discord4j.core.`object`.entity.Member
 import discord4j.core.`object`.entity.Message
+import discord4j.core.`object`.entity.channel.CategorizableChannel
 import discord4j.core.`object`.entity.channel.Channel
 import discord4j.core.`object`.entity.channel.TextChannel
 import discord4j.core.`object`.entity.channel.ThreadChannel
@@ -215,7 +216,7 @@ class MessageService(
             if (ignoredChannels.contains(thread.parentId.get())) return false
 
             // Check if parent is in ignored category
-            val parent = thread.parent.ofType(TextChannel::class.java).awaitSingle()
+            val parent = thread.parent.ofType(CategorizableChannel::class.java).awaitSingle()
             if (parent.categoryId.map(ignoredChannels::contains).orElse(false)) return false
         } else {
             // Can be categorized, check if category is ignored
