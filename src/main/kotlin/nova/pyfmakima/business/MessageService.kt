@@ -4,7 +4,9 @@ import discord4j.common.util.Snowflake
 import discord4j.core.GatewayDiscordClient
 import discord4j.core.`object`.entity.Member
 import discord4j.core.`object`.entity.Message
+import discord4j.core.`object`.entity.channel.Channel
 import discord4j.core.`object`.entity.channel.TextChannel
+import discord4j.core.`object`.entity.channel.ThreadChannel
 import discord4j.core.`object`.reaction.ReactionEmoji
 import discord4j.core.retriever.EntityRetrievalStrategy
 import kotlinx.coroutines.reactive.awaitFirstOrNull
@@ -18,6 +20,7 @@ import nova.pyfmakima.database.MessageRecordData
 import nova.pyfmakima.database.MessageRecordRepository
 import nova.pyfmakima.extensions.asSeconds
 import nova.pyfmakima.extensions.extractUrls
+import nova.pyfmakima.extensions.isThread
 import nova.pyfmakima.extensions.toSnowflake
 import nova.pyfmakima.logger.LOGGER
 import nova.pyfmakima.`object`.MessageRecord
@@ -205,8 +208,20 @@ class MessageService(
 
 
         // Check if channel is in ignored category
-        val channel = message.channel.ofType(TextChannel::class.java).awaitSingle()
-        if (channel.categoryId.map(ignoredChannels::contains).orElse(false)) return false
+        val channelType = message.channel.ofType(Channel::class.java).awaitSingle().type
+        if (channelType.isThread()) {
+            // Check if thread is in ignored channel
+            val thread = message.channel.ofType(ThreadChannel::class.java).awaitSingle()
+            if (ignoredChannels.contains(thread.parentId.get())) return false
+
+            // Check if parent is in ignored category
+            val parent = thread.parent.ofType(TextChannel::class.java).awaitSingle()
+            if (parent.categoryId.map(ignoredChannels::contains).orElse(false)) return false
+        } else {
+            // Can be categorized, check if category is ignored
+            val channel = message.channel.ofType(TextChannel::class.java).awaitSingle()
+            if (channel.categoryId.map(ignoredChannels::contains).orElse(false)) return false
+        }
 
         return true
     }
