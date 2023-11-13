@@ -216,7 +216,10 @@ class MessageService(
             if (ignoredChannels.contains(thread.parentId.get())) return false
 
             // Check if parent is in ignored category
-            val parent = thread.parent.ofType(CategorizableChannel::class.java).awaitSingle()
+            val parent = thread.client
+                .getChannelById(thread.parentId.get())
+                .ofType(CategorizableChannel::class.java)
+                .awaitSingle()
             if (parent.categoryId.map(ignoredChannels::contains).orElse(false)) return false
         } else {
             // Can be categorized, check if category is ignored
