@@ -172,7 +172,7 @@ class LevelService(
         val newLevel = calculateLevelFromXp(userLevel.xp + xpGained)
 
         if (newLevel > currentLevel) {
-            TODO("Add handling for level up")
+            // TODO: Add handling for level up
         }
 
         upsertUserLevel(userLevel.copy(xp = userLevel.xp + xpGained))

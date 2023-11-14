@@ -81,6 +81,7 @@ class EmbedService(
             .addField("Average XP Per Message", "`${userLevel.xp / totalTrackedMessages}`", true)
             .addField("Days Active", "`$daysActive`", true)
             .addField("Messages Per Hour (last 48 hours)", "`$messagePerHour`", false)
+            .addField("Total Messages", "`$totalTrackedMessages`", true)
             .thumbnail(member.effectiveAvatarUrl)
             .timestamp(Instant.now())
             .build()
