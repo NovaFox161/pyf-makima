@@ -30,18 +30,17 @@ class LevelService(
     /// Calculation functions ///
     /////////////////////////////
     fun calculateXpToReachLevel(level: Int): Float {
+        // Ensures that the experience required for each level increases more steeply as the level goes up
         // Chosen to provide balance between making early levels easy to achieve and higher levels more challenging.
         val quadraticCoefficient = 100
-        // Ensures that the experience required for each level increases more steeply as the level goes up
-        val quadraticTerm = quadraticCoefficient * level.toFloat().pow(2)
 
-        // Chosen to create a smoother leveling experience
-        val linearCoefficient = 30
         // slightly offsets the quadratic term making the experience requirements for lower levels more accessible
         // while still maintaining the overall increasing curve.
-        val linearTerm = linearCoefficient * level
+        // Chosen to create a smoother leveling experience
+        val linearCoefficient = -30
 
-        return quadraticTerm + linearTerm + 40 // 40 is a good starting place for the quadratic line for xp
+        // 40 is a good starting place for the quadratic line for xp
+        return (quadraticCoefficient * level.toFloat().pow(2)) + (linearCoefficient + level) + 40
     }
 
     fun calculateLevelFromXp(xp: Float): Int {
