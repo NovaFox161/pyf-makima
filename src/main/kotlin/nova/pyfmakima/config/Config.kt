@@ -58,6 +58,7 @@ enum class Config(private val key: String, private var value: Any? = null) {
 
     LEVELING_IGNORED_CHANNELS("bot.leveling.ignored-channels", ""),
     LEVELING_TRACKED_ROLES("bot.leveling.tracked-roles", ""),
+    LEVELING_IDEAL_WORD_COUNT("bot.leveling.ideal-word-count", 64),
     ;
 
     companion object {

@@ -47,9 +47,11 @@ class LevelService(
         return ((30 + sqrt(900 + 400 * (xp - 40))) / 200).toInt()
     }
 
-    fun calculateLengthScore(message: String): Float {
+    fun calculateLengthScore(message: String, hasMedia: Boolean): Float {
         val wordCountDividerConstant = 30
-        val wordCount = message.trim().split(regex = Regex("\\s+")).size
+        val idealWordCount = Config.LEVELING_IDEAL_WORD_COUNT.getInt()
+
+        val wordCount = message.trim().split(regex = Regex("\\s+")).size + if (hasMedia) (idealWordCount * 0.75).toInt() else 0
 
         // bound between 0.1 and 1.0
         return min(1.0f, max(0.1f, wordCount.toFloat() / wordCountDividerConstant))
@@ -97,8 +99,11 @@ class LevelService(
 
     suspend fun calculateExperienceGainedFromMessage(message: Message): Float {
         val author = message.authorAsMember.awaitSingle()
+        val hasMedia = message.embeds.isNotEmpty()
+            || message.attachments.isNotEmpty()
+            || message.stickersItems.isNotEmpty()
 
-        val lengthScore = calculateLengthScore(message.content)
+        val lengthScore = calculateLengthScore(message.content, hasMedia)
         val rateScore = calculateRateScore(author)
         val longevityScore = calculateLongevityScore(author)
         val consistencyScore = calculateConsistencyScore(author)
