@@ -26,25 +26,53 @@ class LevelService(
     private val userLevelRepository: UserLevelRepository,
     private val userLevelCache: UserLevelCache,
 ) {
+    // Chosen to provide balance between making early levels easy to achieve and higher levels more challenging.
+    private val QUADRATIC_COEFFICIENT = 100
+    //  Chosen to create a smoother leveling experience
+    private val LINEAR_COEFFICIENT = -30
+    //  Chosen to create a good starting place for the quadratic line for xp
+    private val CONSTANT = 40
+
     /////////////////////////////
     /// Calculation functions ///
     /////////////////////////////
+
+    /**
+     * Calculates the amount of experience required to reach the given level.
+     *
+     * Quadratic formula in use: f(x) = ax^2 + bx + c
+     *
+     * Where a is the quadratic coefficient, b is the linear coefficient, and c is a constant.
+     * @param level The level to calculate the experience required to reach.
+     * @return The amount of experience required to reach the given level.
+     */
     fun calculateXpToReachLevel(level: Int): Float {
-        // Ensures that the experience required for each level increases more steeply as the level goes up
-        // Chosen to provide balance between making early levels easy to achieve and higher levels more challenging.
-        val quadraticCoefficient = 100
+        // Calculate quadratic term (level squared times quadratic coefficient)
+        val quadraticTerm = QUADRATIC_COEFFICIENT * level.toFloat().pow(2)
 
-        // slightly offsets the quadratic term making the experience requirements for lower levels more accessible
-        // while still maintaining the overall increasing curve.
-        // Chosen to create a smoother leveling experience
-        val linearCoefficient = -30
+        // Calculate linear term (level times linear coefficient). This slightly offsets the quadratic term making the
+        // experience requirements for lower levels more accessible while still maintaining the overall increasing curve.
+        val linearTerm = LINEAR_COEFFICIENT * level
 
-        // 40 is a good starting place for the quadratic line for xp
-        return (quadraticCoefficient * level.toFloat().pow(2)) + (linearCoefficient + level) + 40
+        // Sum the quadratic term, linear term, and constant to get total experience
+        return quadraticTerm + linearTerm + CONSTANT
     }
 
+    /**
+     * Calculates the level based on the given experience points, using the quadratic formula to reverse-engineer the level.
+     *
+     * Quadratic formula: x = (-b +/- sqrt(b^2 - 4ac)) / 2a
+     *
+     * Since the level cannot be negative, only the positive version of the formula is used.
+     * @param xp The experience points for which to calculate the level
+     * @return The level corresponding to the specified experience points.
+     */
     fun calculateLevelFromXp(xp: Float): Int {
-        return ((30 + sqrt(900 + 400 * (xp - 40))) / 200).toInt()
+        val a = QUADRATIC_COEFFICIENT
+        val b = LINEAR_COEFFICIENT.toFloat()
+        val c = CONSTANT - xp
+
+        return ((-b + sqrt(b.pow(2) - 4 * a * c)) / (2 * a)).toInt()
     }
 
     fun calculateLengthScore(message: String, hasMedia: Boolean): Float {
