@@ -287,4 +287,11 @@ class MessageService(
             memberId = memberId.asLong()
         ).awaitSingle()
     }
+
+    suspend fun getTotalCalculatedWordCount(guildId: Snowflake, memberId: Snowflake): Long {
+        return messageRecordRepository.sumWordsByGuildIdAndMemberId(
+            guildId = guildId.asLong(),
+            memberId = memberId.asLong()
+        ).awaitSingle()
+    }
 }
