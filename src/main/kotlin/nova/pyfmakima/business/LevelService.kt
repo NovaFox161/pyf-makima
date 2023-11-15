@@ -75,14 +75,43 @@ class LevelService(
         return ((-b + sqrt(b.pow(2) - 4 * a * c)) / (2 * a)).toInt()
     }
 
+    /**
+     * Calculates the score based on the length and content of the given message.
+     * @param message The message to calculate the score for.
+     * @param hasMedia Whether the message contains media.
+     * @return The score for the given message.
+     */
     fun calculateLengthScore(message: String, hasMedia: Boolean): Float {
-        val wordCountDividerConstant = 30
         val idealWordCount = Config.LEVELING_IDEAL_WORD_COUNT.getInt()
 
-        val wordCount = message.trim().split(regex = Regex("\\s+")).size + if (hasMedia) (idealWordCount * 0.75).toInt() else 0
+        val baseWordCount = message.trim().split(regex = Regex("\\s+")).size
+        // If the message has media, add additional words to the count, calculated as 75% of the ideal word count
+        val additionalWordsForMedia = if (hasMedia) (idealWordCount * 0.75).toInt() else 0
 
-        // bound between 0.1 and 1.0
-        return min(1.0f, max(0.1f, wordCount.toFloat() / wordCountDividerConstant))
+        // Calculate the total word count by adding the base word count and any additional words for media
+        val totalWordCount = baseWordCount + additionalWordsForMedia
+
+        // Calculate the base score as the ratio of the total word count to the ideal word count, ensuring it's between 0.1f and 1.0f
+        var score = min(1.0f, totalWordCount.toFloat() / idealWordCount)
+
+        // Incremental scoring for messages that exceed the ideal word count
+        if (totalWordCount > idealWordCount) {
+            // Calculate the percentage of the ideal word count
+            val percentageOfIdeal = totalWordCount.toFloat() / idealWordCount
+
+            // If the message is between 100% and 200% of the ideal word count,
+            score += if (percentageOfIdeal <= 2.0f) {
+                // increment the score by 2% for each percentage point over 100%
+                (percentageOfIdeal - 1.0f) * 0.02f
+            } else {
+                // If the message exceeds 200% of the ideal word count,
+                // increment the score by 1% for each percentage point over 200%
+                0.02f + (percentageOfIdeal - 2.0f) * 0.01f
+            }
+        }
+
+        // Ensure the final score does not exceed the maximum (e.g., 5.0f) and is not below the minimum (e.g., 0.1f)
+        return min(5.0f, max(0.1f, score))
     }
 
     suspend fun calculateRateScore(member: Member): Float {
