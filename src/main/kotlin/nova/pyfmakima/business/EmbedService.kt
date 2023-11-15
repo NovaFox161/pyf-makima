@@ -66,7 +66,7 @@ class EmbedService(
             member.id,
             start = Instant.now().minus(Duration.ofHours(48))
         )
-        val totalCalculatedWordCount = messageService.getTotalCalculatedWordCount(member.guildId, member.id)
+        val totalCalculatedWordCount = messageService.getTotalCalculatedWordCount(member.guildId, member.id).toFloat()
 
 
         return EmbedCreateSpec.builder()
