@@ -95,7 +95,7 @@ class MessageService(
         return false
     }
 
-    suspend fun addToQueue(message: Message) {
+    suspend fun  addToQueue(message: Message) {
         LOGGER.debug("Adding message ${message.id.asString()} to queue")
 
         trackedMessages.add(message.id)
@@ -117,6 +117,7 @@ class MessageService(
 
         val message = discordClient
             .getMessageById(channelId, messageId)
+            .onErrorResume { Mono.empty() }
             .awaitSingleOrNull() ?: return
 
         if (!qualifiesForRuleNine(message)) return // No longer qualifies
@@ -137,6 +138,7 @@ class MessageService(
 
         val message = discordClient
             .getMessageById(channelId, messageId)
+            .onErrorResume { Mono.empty() }
             .awaitSingleOrNull() ?: return
 
         if (!qualifiesForRuleNine(message)) return // No longer qualifies
@@ -156,6 +158,7 @@ class MessageService(
         val message = discordClient
             .withRetrievalStrategy(EntityRetrievalStrategy.REST)
             .getMessageById(channelId, messageId)
+            .onErrorResume { Mono.empty() }
             .awaitSingleOrNull() ?: return
 
         if (!message.reactions.map { it.emoji }.contains(getWarningEmote())) return // Doesn't even have warning emote

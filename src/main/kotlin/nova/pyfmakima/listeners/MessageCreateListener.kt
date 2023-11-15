@@ -13,8 +13,12 @@ class MessageCreateListener(
 ): EventListener<MessageCreateEvent> {
 
     override suspend fun handle(event: MessageCreateEvent) {
-        handleRuleNineEnforcement(event)
-        handleLeveling(event)
+        try {
+            handleRuleNineEnforcement(event)
+            handleLeveling(event)
+        } catch (e: Exception) {
+            LOGGER.error("Error handling message create event", e)
+        }
     }
 
 
