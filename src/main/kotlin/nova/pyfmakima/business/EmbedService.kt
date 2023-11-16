@@ -67,6 +67,8 @@ class EmbedService(
             start = Instant.now().minus(Duration.ofHours(48))
         )
         val totalCalculatedWordCount = messageService.getTotalCalculatedWordCount(member.guildId, member.id).toFloat()
+        val averageWordCount = totalCalculatedWordCount / totalTrackedMessages
+        val averageLengthScore = levelService.calculateLengthScore(averageWordCount.toInt(), hasMedia = false)
 
 
         return EmbedCreateSpec.builder()
@@ -83,7 +85,8 @@ class EmbedService(
             .addField("Days Active", "`$daysActive`", true)
             .addField("Messages Per Hour (last 48 hours)", "`$messagePerHour`", false)
             .addField("Total Messages", "`$totalTrackedMessages`", true)
-            .addField("Avg Word Count", "`${totalCalculatedWordCount / totalTrackedMessages}`", true)
+            .addField("Avg Word Count", "`$averageWordCount`", true)
+            .addField("Avg Length Score", "`$averageLengthScore`", false)
             .thumbnail(member.effectiveAvatarUrl)
             .timestamp(Instant.now())
             .build()

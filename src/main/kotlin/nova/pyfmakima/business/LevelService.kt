@@ -77,19 +77,18 @@ class LevelService(
 
     /**
      * Calculates the score based on the length and content of the given message.
-     * @param message The message to calculate the score for.
+     * @param wordCount The number of words in the message, defined as the number of whitespace-separated substrings.
      * @param hasMedia Whether the message contains media.
      * @return The score for the given message.
      */
-    fun calculateLengthScore(message: String, hasMedia: Boolean): Float {
+    fun calculateLengthScore(wordCount: Int, hasMedia: Boolean): Float {
         val idealWordCount = Config.LEVELING_IDEAL_WORD_COUNT.getInt()
 
-        val baseWordCount = message.trim().split(regex = Regex("\\s+")).size
         // If the message has media, add additional words to the count, calculated as 75% of the ideal word count
         val additionalWordsForMedia = if (hasMedia) (idealWordCount * 0.75).toInt() else 0
 
         // Calculate the total word count by adding the base word count and any additional words for media
-        val totalWordCount = baseWordCount + additionalWordsForMedia
+        val totalWordCount = wordCount + additionalWordsForMedia
 
         // Calculate the base score as the ratio of the total word count to the ideal word count, ensuring it's between 0.1f and 1.0f
         var score = min(1.0f, totalWordCount.toFloat() / idealWordCount)
@@ -159,8 +158,9 @@ class LevelService(
         val hasMedia = message.embeds.isNotEmpty()
             || message.attachments.isNotEmpty()
             || message.stickersItems.isNotEmpty()
+        val wordCount = message.content.trim().split(regex = Regex("\\s+")).size
 
-        val lengthScore = calculateLengthScore(message.content, hasMedia)
+        val lengthScore = calculateLengthScore(wordCount, hasMedia)
         val rateScore = calculateRateScore(author)
         val longevityScore = calculateLongevityScore(author)
         val consistencyScore = calculateConsistencyScore(author)
