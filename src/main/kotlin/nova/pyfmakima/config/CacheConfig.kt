@@ -34,13 +34,13 @@ class CacheConfig {
     fun userLevelRedisCache(objectMapper: ObjectMapper, redisTemplate: ReactiveStringRedisTemplate): UserLevelCache =
         RedisStringCacheRepository(objectMapper, redisTemplate, "UserLevels", userLevelTtl)
 
-    @Bean
+    @Bean(name = ["daysActiveCache"])
     @Primary
     @ConditionalOnProperty("bot.cache.redis", havingValue = "true")
     fun daysActiveRedisCache(objectMapper: ObjectMapper, redisTemplate: ReactiveStringRedisTemplate): DaysActiveCache =
         RedisStringCacheRepository(objectMapper, redisTemplate, "DaysActive", daysActiveTtl)
 
-    @Bean
+    @Bean(name = ["leveledUserCountCache"])
     @Primary
     @ConditionalOnProperty("bot.cache.redis", havingValue = "true")
     fun leveledUserCountRedisCache(objectMapper: ObjectMapper, redisTemplate: ReactiveStringRedisTemplate): LeveledUserCountCache =
@@ -55,9 +55,9 @@ class CacheConfig {
     @Bean
     fun userLevelCache(): UserLevelCache = JdkCacheRepository(userLevelTtl)
 
-    @Bean
+    @Bean(name = ["daysActiveCache"])
     fun daysActiveCache(): DaysActiveCache = JdkCacheRepository(daysActiveTtl)
 
-    @Bean
+    @Bean(name = ["leveledUserCountCache"])
     fun leveledUserCountCache(): LeveledUserCountCache = JdkCacheRepository(leveledUserCountTtl)
 }

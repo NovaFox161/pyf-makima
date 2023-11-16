@@ -11,6 +11,7 @@ import nova.pyfmakima.config.Config
 import nova.pyfmakima.database.UserLevelData
 import nova.pyfmakima.database.UserLevelRepository
 import nova.pyfmakima.`object`.UserLevel
+import org.springframework.beans.factory.annotation.Qualifier
 import org.springframework.data.domain.Pageable
 import org.springframework.stereotype.Component
 import java.time.Duration
@@ -26,6 +27,7 @@ class LevelService(
     private val messageService: MessageService,
     private val userLevelRepository: UserLevelRepository,
     private val userLevelCache: UserLevelCache,
+    @Qualifier("leveledUserCountCache")
     private val leveledUserCountCache: LeveledUserCountCache,
 ) {
     // Chosen to provide balance between making early levels easy to achieve and higher levels more challenging.

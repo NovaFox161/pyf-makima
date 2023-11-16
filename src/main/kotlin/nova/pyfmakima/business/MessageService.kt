@@ -26,6 +26,7 @@ import nova.pyfmakima.extensions.toSnowflake
 import nova.pyfmakima.logger.LOGGER
 import nova.pyfmakima.`object`.MessageRecord
 import org.springframework.beans.factory.BeanFactory
+import org.springframework.beans.factory.annotation.Qualifier
 import org.springframework.beans.factory.getBean
 import org.springframework.stereotype.Component
 import org.springframework.util.CollectionUtils
@@ -41,6 +42,7 @@ import java.util.concurrent.CopyOnWriteArrayList
 class MessageService(
     private val messageRecordRepository: MessageRecordRepository,
     private val messageRecordCache: MessageRecordCache,
+    @Qualifier("daysActiveCache")
     private val daysActiveCache: DaysActiveCache,
     private val metricService: MetricService,
     private val beanFactory: BeanFactory,
