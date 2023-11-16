@@ -9,3 +9,4 @@ import nova.pyfmakima.`object`.UserLevel
 typealias MessageRecordCache = CacheRepository<Snowflake, MessageRecord>
 typealias UserLevelCache = CacheRepository<Snowflake, UserLevel>
 typealias DaysActiveCache = CacheRepository<Snowflake, Long>
+typealias LeveledUserCountCache = CacheRepository<Snowflake, Long>

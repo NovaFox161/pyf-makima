@@ -19,6 +19,7 @@ enum class Config(private val key: String, private var value: Any? = null) {
     CACHE_TTL_MESSAGE_RECORD_MINUTES("bot.cache.ttl-minutes.message-record", 60),
     CACHE_TTL_USER_LEVEL_MINUTES("bot.cache.ttl-minutes.user-level", 60),
     CACHE_TTL_DAYS_ACTIVE_MINUTES("bot.cache.ttl-minutes.days-active", 60),
+    CACHE_TTL_LEVELED_USER_MINUTES("bot.cache.ttl-minutes.leveled-user", 60),
 
     // Global bot timings
     TIMING_MESSAGE_REACT_SECONDS("bot.timing.message-react.seconds", 60),
@@ -55,6 +56,7 @@ enum class Config(private val key: String, private var value: Any? = null) {
 
     // Leveling
     LEVELING_EPOCH("bot.leveling.epoch"),
+    LEVELING_LEADERBOARD_PAGE_SIZE("bot.leveling.leaderboard.page-size", 10),
 
     LEVELING_IGNORED_CHANNELS("bot.leveling.ignored-channels", ""),
     LEVELING_TRACKED_ROLES("bot.leveling.tracked-roles", ""),

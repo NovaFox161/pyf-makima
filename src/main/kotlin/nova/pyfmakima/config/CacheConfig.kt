@@ -2,6 +2,7 @@ package nova.pyfmakima.config
 
 import com.fasterxml.jackson.databind.ObjectMapper
 import nova.pyfmakima.DaysActiveCache
+import nova.pyfmakima.LeveledUserCountCache
 import nova.pyfmakima.MessageRecordCache
 import nova.pyfmakima.UserLevelCache
 import nova.pyfmakima.cache.JdkCacheRepository
@@ -18,6 +19,7 @@ class CacheConfig {
     private val messageRecordTtl = Config.CACHE_TTL_MESSAGE_RECORD_MINUTES.getLong().asMinutes()
     private val userLevelTtl = Config.CACHE_TTL_USER_LEVEL_MINUTES.getLong().asMinutes()
     private val daysActiveTtl = Config.CACHE_TTL_DAYS_ACTIVE_MINUTES.getLong().asMinutes()
+    private val leveledUserCountTtl = Config.CACHE_TTL_LEVELED_USER_MINUTES.getLong().asMinutes()
 
     // Redis caching
     @Bean
@@ -38,6 +40,12 @@ class CacheConfig {
     fun daysActiveRedisCache(objectMapper: ObjectMapper, redisTemplate: ReactiveStringRedisTemplate): DaysActiveCache =
         RedisStringCacheRepository(objectMapper, redisTemplate, "DaysActive", daysActiveTtl)
 
+    @Bean
+    @Primary
+    @ConditionalOnProperty("bot.cache.redis", havingValue = "true")
+    fun leveledUserCountRedisCache(objectMapper: ObjectMapper, redisTemplate: ReactiveStringRedisTemplate): LeveledUserCountCache =
+        RedisStringCacheRepository(objectMapper, redisTemplate, "LeveledUserCounts", leveledUserCountTtl)
+
 
 
     // In-memory fallback caching
@@ -49,4 +57,7 @@ class CacheConfig {
 
     @Bean
     fun daysActiveCache(): DaysActiveCache = JdkCacheRepository(daysActiveTtl)
+
+    @Bean
+    fun leveledUserCountCache(): LeveledUserCountCache = JdkCacheRepository(leveledUserCountTtl)
 }

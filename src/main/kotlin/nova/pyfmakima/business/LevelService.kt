@@ -5,6 +5,7 @@ import discord4j.core.`object`.entity.Member
 import discord4j.core.`object`.entity.Message
 import kotlinx.coroutines.reactor.awaitSingle
 import kotlinx.coroutines.reactor.awaitSingleOrNull
+import nova.pyfmakima.LeveledUserCountCache
 import nova.pyfmakima.UserLevelCache
 import nova.pyfmakima.config.Config
 import nova.pyfmakima.database.UserLevelData
@@ -25,6 +26,7 @@ class LevelService(
     private val messageService: MessageService,
     private val userLevelRepository: UserLevelRepository,
     private val userLevelCache: UserLevelCache,
+    private val leveledUserCountCache: LeveledUserCountCache,
 ) {
     // Chosen to provide balance between making early levels easy to achieve and higher levels more challenging.
     private val QUADRATIC_COEFFICIENT = 100
@@ -196,6 +198,8 @@ class LevelService(
                 memberId = userLevel.memberId.asLong(),
                 xp = userLevel.xp,
             )).awaitSingleOrNull()
+
+            leveledUserCountCache.evict(key = userLevel.guildId)
         }
 
         userLevelCache.put(userLevel.guildId, userLevel.memberId, userLevel)
@@ -209,7 +213,13 @@ class LevelService(
     }
 
     suspend fun getTotalLeveledUserCount(guildId: Snowflake): Long {
-        return userLevelRepository.countByGuildId(guildId.asLong()).awaitSingle()
+        var count = leveledUserCountCache.get(key = guildId)
+        if (count != null) return count
+
+        count = userLevelRepository.countByGuildId(guildId.asLong()).awaitSingle()
+
+        leveledUserCountCache.put(key = guildId, value = count)
+        return count
     }
 
     suspend fun getCurrentRank(guildId: Snowflake, memberId: Snowflake): Long {

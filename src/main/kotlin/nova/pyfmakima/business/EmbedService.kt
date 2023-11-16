@@ -3,6 +3,7 @@ package nova.pyfmakima.business
 import discord4j.core.`object`.entity.Guild
 import discord4j.core.`object`.entity.Member
 import discord4j.core.spec.EmbedCreateSpec
+import nova.pyfmakima.config.Config
 import nova.pyfmakima.extensions.embedTitleSafe
 import nova.pyfmakima.utils.GlobalValues.embedColor
 import nova.pyfmakima.utils.GlobalValues.iconUrl
@@ -18,7 +19,6 @@ class EmbedService(
     private val levelService: LevelService,
     private val messageService: MessageService,
 ) {
-    private val leaderboardPageSize = 20
     private val xpFormat = DecimalFormat("#.##")
 
     init {
@@ -26,6 +26,7 @@ class EmbedService(
     }
 
     suspend fun generateLevelLeaderboardEmbed(guild: Guild, page: Int): EmbedCreateSpec {
+        val leaderboardPageSize = Config.LEVELING_LEADERBOARD_PAGE_SIZE.getInt()
         val leaders = levelService.getTopUsers(guild.id, page, leaderboardPageSize)
         val totalRecords = levelService.getTotalLeveledUserCount(guild.id)
         val formattedLeaderboard = StringBuilder()
