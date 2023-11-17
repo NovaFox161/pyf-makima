@@ -10,10 +10,10 @@ import org.springframework.stereotype.Component
 import kotlin.jvm.optionals.getOrNull
 
 @Component
-class LevelCommand(
+class InfoCommand(
     private val embedService: EmbedService,
 ): SlashCommand {
-    override val name = "level"
+    override val name = "info"
     override val ephemeral = false
 
     override suspend fun handle(event: ChatInputInteractionEvent) {
