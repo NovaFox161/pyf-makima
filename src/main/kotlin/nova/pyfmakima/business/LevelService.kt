@@ -169,7 +169,7 @@ class LevelService(
         val longevityScore = calculateLongevityScore(author)
         val consistencyScore = calculateConsistencyScore(author)
 
-        return (lengthScore * rateScore * (longevityScore + consistencyScore) * 5)
+        return (lengthScore * rateScore * (longevityScore + consistencyScore) * 10)
     }
 
     ////////////////////////////
