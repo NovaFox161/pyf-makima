@@ -28,7 +28,7 @@ class EmbedService(
     suspend fun generateLevelLeaderboardEmbed(guild: Guild, page: Int): EmbedCreateSpec {
         val leaderboardPageSize = Config.LEVELING_LEADERBOARD_PAGE_SIZE.getInt()
         val leaders = levelService.getTopUsers(guild.id, page, leaderboardPageSize)
-        val totalRecords = levelService.getTotalLeveledUserCount(guild.id)
+        val pageCount = levelService.getLeaderboardPageCount(guild.id)
         val formattedLeaderboard = StringBuilder()
 
         leaders.forEachIndexed { index, userLevel ->
@@ -46,7 +46,7 @@ class EmbedService(
             .color(embedColor)
             .title("Leaderboard for ${guild.name}".embedTitleSafe())
             .description(formattedLeaderboard.toString())
-            .footer("Page ${page + 1}/${ceil(totalRecords / leaderboardPageSize.toDouble()).toInt()}", null)
+            .footer("Page ${page + 1}/$pageCount", null)
             .timestamp(Instant.now())
             .build()
     }

@@ -4,7 +4,7 @@ import discord4j.core.event.domain.interaction.InteractionCreateEvent
 
 interface InteractionHandler<T : InteractionCreateEvent> {
     val ids: Array<String>
-    val defer: Boolean
+    val deferEdit: Boolean
 
     suspend fun handle(event: T)
 }

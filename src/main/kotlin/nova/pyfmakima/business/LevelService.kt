@@ -17,10 +17,7 @@ import org.springframework.stereotype.Component
 import java.time.Duration
 import java.time.Instant
 import kotlin.jvm.optionals.getOrDefault
-import kotlin.math.max
-import kotlin.math.min
-import kotlin.math.pow
-import kotlin.math.sqrt
+import kotlin.math.*
 
 @Component
 class LevelService(
@@ -227,6 +224,13 @@ class LevelService(
     suspend fun getCurrentRank(guildId: Snowflake, memberId: Snowflake): Long {
         return userLevelRepository.calculateRankByGuildIdAndMemberId(guildId. asLong(), memberId.asLong())
             .awaitSingleOrNull() ?: 0
+    }
+
+    suspend fun getLeaderboardPageCount(guildId: Snowflake): Int {
+        val leaderboardPageSize = Config.LEVELING_LEADERBOARD_PAGE_SIZE.getInt()
+        val totalRecords = getTotalLeveledUserCount(guildId)
+
+        return ceil(totalRecords / leaderboardPageSize.toDouble()).toInt()
     }
 
     //////////////////////////////

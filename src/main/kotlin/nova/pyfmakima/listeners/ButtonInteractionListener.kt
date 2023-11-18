@@ -18,11 +18,12 @@ class ButtonInteractionListener(
             return
         }
 
+        // TODO: Need to do pattern matching on this to support IDs like `leaderboard-next-{page}`
         val button = buttons.firstOrNull { it.ids.contains(event.customId) }
 
         if (button != null) {
             try {
-                if (button.defer) event.deferReply().awaitSingleOrNull()
+                if (button.deferEdit) event.deferEdit().awaitSingleOrNull()
 
                 button.handle(event)
             } catch (e: Exception) {

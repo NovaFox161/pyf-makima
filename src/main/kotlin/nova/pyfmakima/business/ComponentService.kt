@@ -5,18 +5,14 @@ import discord4j.core.`object`.component.ActionRow
 import discord4j.core.`object`.component.Button
 import discord4j.core.`object`.component.LayoutComponent
 import discord4j.core.`object`.reaction.ReactionEmoji
-import nova.pyfmakima.config.Config
 import org.springframework.stereotype.Component
-import kotlin.math.ceil
 
 @Component
 class ComponentService(
     private val levelService: LevelService,
 ) {
     suspend fun getLeaderboardPaginationComponents(guildId: Snowflake, currentPage: Int): Array<LayoutComponent> {
-        val leaderboardPageSize = Config.LEVELING_LEADERBOARD_PAGE_SIZE.getInt()
-        val totalRecords = levelService.getTotalLeveledUserCount(guildId)
-        val pages = ceil(totalRecords / leaderboardPageSize.toDouble()).toInt()
+        val pageCount = levelService.getLeaderboardPageCount(guildId)
 
 
         val previousPageButton = Button.primary(
@@ -28,7 +24,7 @@ class ComponentService(
             "leaderboard-next-$currentPage",
             ReactionEmoji.unicode("\u27A1\uFE0F"), // right arrow emote
             "Next"
-        ).disabled(currentPage >= pages - 1)
+        ).disabled(currentPage >= pageCount - 1)
 
 
         return arrayOf(ActionRow.of(previousPageButton, nextPageButton))
