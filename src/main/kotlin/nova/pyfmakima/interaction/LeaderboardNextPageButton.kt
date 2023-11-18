@@ -15,7 +15,7 @@ class LeaderboardNextPageButton(
     private val embedService: EmbedService,
     private val componentService: ComponentService,
 ): InteractionHandler<ButtonInteractionEvent> {
-    override val ids = arrayOf("leaderboard-next-{page}")
+    override val ids = arrayOf("leaderboard-next-")
     override val deferEdit = true
 
     override suspend fun handle(event: ButtonInteractionEvent) {

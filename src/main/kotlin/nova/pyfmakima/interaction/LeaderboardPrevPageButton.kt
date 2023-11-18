@@ -13,7 +13,7 @@ class LeaderboardPrevPageButton(
     private val embedService: EmbedService,
     private val componentService: ComponentService,
 ): InteractionHandler<ButtonInteractionEvent> {
-    override val ids = arrayOf("leaderboard-prev-{page}")
+    override val ids = arrayOf("leaderboard-prev-")
     override val deferEdit = true
 
     override suspend fun handle(event: ButtonInteractionEvent) {
