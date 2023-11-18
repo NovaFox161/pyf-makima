@@ -25,7 +25,7 @@ class ComponentService(
         ).disabled(currentPage >= pageCount - 1)
         val refreshButton = Button.secondary(
             "leaderboard-refresh-$currentPage",
-            ReactionEmoji.unicode("\uD83D\uDD04"), // refresh emote
+            ReactionEmoji.custom(Snowflake.of(1175580426585247815), "refresh_ts", false)
         )
 
         return arrayOf(ActionRow.of(previousPageButton, nextPageButton, refreshButton))
