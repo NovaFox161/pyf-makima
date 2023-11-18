@@ -112,5 +112,5 @@ class JdkCacheRepository<K : Any, V>(override val ttl: Duration) : CacheReposito
         }
     }
 
-    private fun getGuildedCache(guildId: Snowflake?) = cache.getOrDefault(guildId, ConcurrentHashMap<K, Pair<Instant, V>>())
+    private fun getGuildedCache(guildId: Snowflake?) = cache[guildId] ?: ConcurrentHashMap<K, Pair<Instant, V>>()
 }
