@@ -20,7 +20,7 @@ class LeaderboardCommand(
 
         event.createFollowup()
             .withEmbeds(embedService.generateLevelLeaderboardEmbed(guild, page = 0))
-            //.withComponents(*componentService.getLeaderboardPaginationComponents(guild.id, currentPage = 0))
+            .withComponents(*componentService.getLeaderboardPaginationComponents(guild.id, currentPage = 0))
             .awaitSingleOrNull()
     }
 }

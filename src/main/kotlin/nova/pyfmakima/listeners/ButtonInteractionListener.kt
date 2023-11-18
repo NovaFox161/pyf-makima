@@ -22,6 +22,8 @@ class ButtonInteractionListener(
 
         if (button != null) {
             try {
+                if (button.defer) event.deferReply().awaitSingleOrNull()
+
                 button.handle(event)
             } catch (e: Exception) {
                 LOGGER.error(DEFAULT, "Error handling button interaction | $event", e)
