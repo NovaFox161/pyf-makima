@@ -27,7 +27,7 @@ class ComponentService(
         ).disabled(currentPage >= pageCount - 1)
         val refreshButton = Button.secondary(
             "leaderboard-refresh-$currentPage",
-            ReactionEmoji.unicode("\u1F504"), // counter-clockwise arrows emote
+            ReactionEmoji.unicode("\uD83D\uDD04"), // refresh emote
         )
 
         return arrayOf(ActionRow.of(previousPageButton, nextPageButton, refreshButton))
