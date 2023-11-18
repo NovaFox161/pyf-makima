@@ -25,8 +25,11 @@ class ComponentService(
             ReactionEmoji.unicode("\u27A1\uFE0F"), // right arrow emote
             "Next"
         ).disabled(currentPage >= pageCount - 1)
+        val refreshButton = Button.secondary(
+            "leaderboard-refresh-$currentPage",
+            ReactionEmoji.unicode("\u1F504"), // counter-clockwise arrows emote
+        )
 
-
-        return arrayOf(ActionRow.of(previousPageButton, nextPageButton))
+        return arrayOf(ActionRow.of(previousPageButton, nextPageButton, refreshButton))
     }
 }
