@@ -17,13 +17,11 @@ class ComponentService(
 
         val previousPageButton = Button.primary(
             "leaderboard-prev-$currentPage",
-            ReactionEmoji.unicode("\u2B05\uFE0F"), // left arrow emote
-            "Previous"
+            ReactionEmoji.custom(Snowflake.of(1175574267379847318L), "arrow_left_ts", false),
         ).disabled(currentPage <= 0)
         val nextPageButton = Button.primary(
             "leaderboard-next-$currentPage",
-            ReactionEmoji.unicode("\u27A1\uFE0F"), // right arrow emote
-            "Next"
+            ReactionEmoji.custom(Snowflake.of(1175573385724579900L), "arrow_right_ts", false),
         ).disabled(currentPage >= pageCount - 1)
         val refreshButton = Button.secondary(
             "leaderboard-refresh-$currentPage",
