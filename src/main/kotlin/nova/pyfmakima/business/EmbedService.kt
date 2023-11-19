@@ -3,6 +3,8 @@ package nova.pyfmakima.business
 import discord4j.core.`object`.entity.Guild
 import discord4j.core.`object`.entity.Member
 import discord4j.core.spec.EmbedCreateSpec
+import discord4j.rest.util.Image
+import kotlinx.coroutines.reactor.awaitSingle
 import nova.pyfmakima.config.Config
 import nova.pyfmakima.extensions.embedTitleSafe
 import nova.pyfmakima.utils.GlobalValues.embedColor
@@ -71,24 +73,25 @@ class EmbedService(
         val totalCalculatedWordCount = messageService.getTotalCalculatedWordCount(member.guildId, member.id).toFloat()
         val averageWordCount = totalCalculatedWordCount / totalTrackedMessages
         val averageLengthScore = levelService.calculateLengthScore(averageWordCount.toInt(), hasMedia = false)
+        val guildIcon = member.guild.map { it.getIconUrl(Image.Format.PNG).orElse(iconUrl) }.awaitSingle()
 
 
         return EmbedCreateSpec.builder()
-            .author("Makima", null, iconUrl)
+            .author("T#", null, guildIcon) // TODO: Add tier info
             .color(embedColor)
             .title("${member.displayName} - Rank #$currentRank")
             .addField("Level", "*$currentLevel*", true)
             .addField("XP", "`${xpFormat.format(userLevel.xp)}/${xpToNextLevel.toInt()}`", true)
             .addField("Progress", generateXpProgressBar(userLevel.xp, xpToNextLevel), false)
+            .addField("Avg Length Score", "`$averageLengthScore`", false)
             .addField("Rate Score", "`$currentRateScore`", true)
             .addField("Longevity Score", "`$currentLongevityScore`", true)
             .addField("Consistency Score", "`$currentConsistencyScore`", false)
-            .addField("Average XP Per Message", "`${userLevel.xp / totalTrackedMessages}`", true)
-            .addField("Days Active", "`$daysActive`", true)
             .addField("Messages Per Hour (last 48 hours)", "`$messagePerHour`", false)
-            .addField("Total Messages", "`$totalTrackedMessages`", true)
+            .addField("Days Active", "`$daysActive`", false)
+            .addField("Total Messages", "`$totalTrackedMessages`", false)
             .addField("Avg Word Count", "`$averageWordCount`", true)
-            .addField("Avg Length Score", "`$averageLengthScore`", false)
+            .addField("Average Message XP", "`${userLevel.xp / totalTrackedMessages}`", true)
             .thumbnail(member.effectiveAvatarUrl)
             .timestamp(Instant.now())
             .build()
