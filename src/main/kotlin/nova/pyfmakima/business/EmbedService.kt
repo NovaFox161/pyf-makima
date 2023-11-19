@@ -28,13 +28,14 @@ class EmbedService(
     suspend fun generateLevelLeaderboardEmbed(guild: Guild, page: Int): EmbedCreateSpec {
         val leaderboardPageSize = Config.LEVELING_LEADERBOARD_PAGE_SIZE.getInt()
         val leaders = levelService.getTopUsers(guild.id, page, leaderboardPageSize)
+        val startingRank = levelService.getCurrentRank(guild.id, leaders.first().memberId)
         val pageCount = levelService.getLeaderboardPageCount(guild.id)
         val formattedLeaderboard = StringBuilder()
 
         leaders.forEachIndexed { index, userLevel ->
             val level = levelService.calculateLevelFromXp(userLevel.xp)
             formattedLeaderboard
-                .append("${index + 1}. ")
+                .append("${startingRank + index}. ")
                 .append("<@${userLevel.memberId.asString()}> ")
                 .append("${xpFormat.format(userLevel.xp)}xp ")
                 .append("lvl $level")
