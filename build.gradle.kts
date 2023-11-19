@@ -23,13 +23,13 @@ buildscript {
     }
 }
 
-val makimaVersion = "1.0.4"
+val makimaVersion = "1.0.5"
 val gradleWrapperVersion = "8.2.1"
 val javaVersion = "19"
-val d4jVersion = "3.2.6"
+val d4jVersion = "3.3.0-M2"
 val d4jStoresVersion = "3.2.2"
 val discordWebhooksVersion = "0.8.4"
-val mysqlR2dbcVersion = "0.8.2.RELEASE"
+val mySqlConnectorVersion = "8.0.33"
 val springMockkVersion = "4.0.2"
 val logbackContribVersion = "0.1.5"
 
@@ -73,18 +73,18 @@ dependencies {
     implementation("io.projectreactor.kotlin:reactor-kotlin-extensions")
 
     // Spring
-    //implementation("org.springframework.boot:spring-boot-starter-data-jdbc")
-    //implementation("org.springframework.boot:spring-boot-starter-data-r2dbc")
+    implementation("org.springframework.boot:spring-boot-starter-data-jdbc")
+    implementation("org.springframework.boot:spring-boot-starter-data-r2dbc")
     implementation("org.springframework.boot:spring-boot-starter-data-redis")
     implementation("org.springframework.boot:spring-boot-starter-webflux")
     implementation("org.springframework.boot:spring-boot-starter-cache")
     implementation("org.springframework.boot:spring-boot-starter-actuator")
 
     // Database
-    //implementation("org.flywaydb:flyway-core")
-    //implementation("org.flywaydb:flyway-mysql")
-    //implementation("dev.miku:r2dbc-mysql:$mysqlR2dbcVersion")
-    //implementation("mysql:mysql-connector-java")
+    implementation("org.flywaydb:flyway-core")
+    implementation("org.flywaydb:flyway-mysql")
+    implementation("io.asyncer:r2dbc-mysql")
+    implementation("mysql:mysql-connector-java:$mySqlConnectorVersion")
 
 
     // Serialization

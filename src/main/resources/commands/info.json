@@ -1,0 +1,12 @@
+{
+  "name": "info",
+  "description": "Allows viewing your own or another user's level and info",
+  "dm_permission": false,
+  "options": [
+    {
+      "name": "user",
+      "description": "The user whose level and info you want to view",
+      "type": 6
+    }
+  ]
+}

@@ -13,9 +13,6 @@ import discord4j.core.`object`.presence.ClientActivity
 import discord4j.core.`object`.presence.ClientPresence
 import discord4j.core.shard.MemberRequestFilter
 import discord4j.core.shard.ShardingStrategy
-import discord4j.discordjson.json.GuildData
-import discord4j.discordjson.json.MessageData
-import discord4j.discordjson.json.ReactionData
 import discord4j.gateway.intent.Intent
 import discord4j.gateway.intent.IntentSet
 import discord4j.rest.RestClient
@@ -101,7 +98,7 @@ class DiscordConfig {
 
 
             MappingStoreService.create()
-                .setMappings(rss, GuildData::class.java, MessageData::class.java, ReactionData::class.java)
+                .setFallback(rss)
                 .setFallback(JdkStoreService())
         } else JdkStoreService()
     }
@@ -122,6 +119,7 @@ class DiscordConfig {
         Intent.DIRECT_MESSAGES,
         Intent.DIRECT_MESSAGE_REACTIONS,
         Intent.GUILD_MEMBERS,
-        Intent.GUILD_EMOJIS,
+        Intent.GUILD_EMOJIS_AND_STICKERS,
+        Intent.GUILD_VOICE_STATES,
     )
 }
