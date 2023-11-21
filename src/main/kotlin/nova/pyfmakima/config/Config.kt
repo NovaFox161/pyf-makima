@@ -42,6 +42,7 @@ enum class Config(private val key: String, private var value: Any? = null) {
     SHARD_INDEX("bot.sharding.index"),
     LOGGING_WEBHOOKS_USE("bot.logging.webhooks.use", false),
     LOGGING_WEBHOOKS_ALL_ERRORS("bot.logging.webhooks.all-errors", false),
+    INITIAL_STATUS_MESSAGE("bot.initial-status-message"),
 
     // Rule 9 enforcement
     MESSAGE_DELETE_CHANNEL("bot.message-delete.channel"),
