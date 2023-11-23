@@ -81,14 +81,14 @@ class EmbedService(
         val engagementOverviewContent = StringBuilder()
             .appendLine("Messages: `$totalTrackedMessages`")
             .appendLine("Days Active: `$daysActive`")
-            .appendLine("Avg. Word Count: `$averageWordCount`")
+            .appendLine("Avg. Word Count: `${averageWordCount.toInt()}`")
             .toString()
 
         val scoreSummaryContent = StringBuilder()
             .appendLine("Length: `${scoreFormat.format(averageLengthScore)}μ`")
             .appendLine("Rate: `${scoreFormat.format(currentRateScore)}`")
-            .appendLine("Longevity: `$currentLongevityScore`")
-            .appendLine("Consistency: `$currentConsistencyScore`")
+            .appendLine("Longevity: `${scoreFormat.format(currentLongevityScore)}`")
+            .appendLine("Consistency: `${scoreFormat.format(currentConsistencyScore)}`")
             .toString()
 
 
@@ -111,10 +111,8 @@ class EmbedService(
         val progressBarFill = ceil((currentXp / xpToNextLevel) * progressBarLength).toInt()
 
         return StringBuilder()
-            .append("`")
             .append("■".repeat(progressBarFill))
             .append("□".repeat(progressBarLength - progressBarFill))
-            .append("` ")
             .append("${(currentXp / xpToNextLevel * 100).toInt()}%")
             .toString()
     }
