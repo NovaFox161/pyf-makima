@@ -12,7 +12,6 @@ import nova.pyfmakima.utils.GlobalValues.iconUrl
 import org.springframework.stereotype.Component
 import java.math.RoundingMode
 import java.text.DecimalFormat
-import java.time.Duration
 import java.time.Instant
 import kotlin.math.ceil
 
@@ -22,6 +21,8 @@ class EmbedService(
     private val messageService: MessageService,
 ) {
     private val xpFormat = DecimalFormat("#.##")
+    private val xpFormatLong = DecimalFormat("#.######")
+    private val scoreFormat = DecimalFormat("#.###")
 
     init {
         xpFormat.roundingMode = RoundingMode.CEILING
@@ -65,33 +66,41 @@ class EmbedService(
         val currentConsistencyScore = levelService.calculateConsistencyScore(member)
         val totalTrackedMessages = messageService.getTotalMessages(member.guildId, member.id)
         val daysActive = messageService.getDaysActive(member.guildId, member.id)
-        val messagePerHour = messageService.getMessagesPerHour(
-            member.guildId,
-            member.id,
-            start = Instant.now().minus(Duration.ofHours(48))
-        )
         val totalCalculatedWordCount = messageService.getTotalCalculatedWordCount(member.guildId, member.id).toFloat()
         val averageWordCount = totalCalculatedWordCount / totalTrackedMessages
         val averageLengthScore = levelService.calculateLengthScore(averageWordCount.toInt(), hasMedia = false)
         val guildIcon = member.guild.map { it.getIconUrl(Image.Format.PNG).orElse(iconUrl) }.awaitSingle()
 
 
+        val levelAndProgressContent = StringBuilder()
+            .appendLine("Level: `$currentLevel`")
+            .appendLine("XP: `${xpFormat.format(userLevel.xp)}/${xpToNextLevel.toInt()}`")
+            .appendLine("Progress: `${generateXpProgressBar(userLevel.xp, xpToNextLevel)}`")
+            .toString()
+
+        val engagementOverviewContent = StringBuilder()
+            .appendLine("Messages: `$totalTrackedMessages`")
+            .appendLine("Days Active: `$daysActive`")
+            .appendLine("Avg. Word Count: `${averageWordCount.toInt()}`")
+            .toString()
+
+        val scoreSummaryContent = StringBuilder()
+            .appendLine("Length: `${scoreFormat.format(averageLengthScore)}μ`")
+            .appendLine("Rate: `${scoreFormat.format(currentRateScore)}`")
+            .appendLine("Longevity: `${scoreFormat.format(currentLongevityScore)}`")
+            .appendLine("Consistency: `${scoreFormat.format(currentConsistencyScore)}`")
+            .toString()
+
+
         return EmbedCreateSpec.builder()
-            .author("T#", null, guildIcon) // TODO: Add tier info
+            .author("Tier #", null, guildIcon)
+            .title("Rank #${currentRank}")
+            .description("<@${member.id.asString()}>")
             .color(embedColor)
-            .title("${member.displayName} - Rank #$currentRank")
-            .addField("Level", "*$currentLevel*", true)
-            .addField("XP", "`${xpFormat.format(userLevel.xp)}/${xpToNextLevel.toInt()}`", true)
-            .addField("Progress", generateXpProgressBar(userLevel.xp, xpToNextLevel), false)
-            .addField("Avg Length Score", "`$averageLengthScore`", false)
-            .addField("Rate Score", "`$currentRateScore`", true)
-            .addField("Longevity Score", "`$currentLongevityScore`", true)
-            .addField("Consistency Score", "`$currentConsistencyScore`", false)
-            .addField("Messages Per Hour (last 48 hours)", "`$messagePerHour`", false)
-            .addField("Days Active", "`$daysActive`", false)
-            .addField("Total Messages", "`$totalTrackedMessages`", false)
-            .addField("Avg Word Count", "`$averageWordCount`", true)
-            .addField("Average Message XP", "`${userLevel.xp / totalTrackedMessages}`", true)
+            .addField("Level & Progress", levelAndProgressContent, false)
+            .addField("Engagement Overview", engagementOverviewContent, false)
+            .addField("Score Summary", scoreSummaryContent, false)
+            .addField("Average Message XP", "`${xpFormatLong.format((userLevel.xp / totalTrackedMessages))}`", false)
             .thumbnail(member.effectiveAvatarUrl)
             .timestamp(Instant.now())
             .build()
@@ -102,11 +111,9 @@ class EmbedService(
         val progressBarFill = ceil((currentXp / xpToNextLevel) * progressBarLength).toInt()
 
         return StringBuilder()
-            .append("`")
             .append("■".repeat(progressBarFill))
             .append("□".repeat(progressBarLength - progressBarFill))
-            .append("` ")
-            .append("${(currentXp / xpToNextLevel * 100).toInt()}%")
+            .append(" ${(currentXp / xpToNextLevel * 100).toInt()}%")
             .toString()
     }
 }
