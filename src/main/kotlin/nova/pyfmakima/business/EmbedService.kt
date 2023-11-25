@@ -6,7 +6,6 @@ import discord4j.core.spec.EmbedCreateSpec
 import discord4j.rest.util.Image
 import kotlinx.coroutines.reactor.awaitSingle
 import nova.pyfmakima.config.Config
-import nova.pyfmakima.extensions.embedTitleSafe
 import nova.pyfmakima.utils.GlobalValues.iconUrl
 import nova.pyfmakima.utils.GlobalValues.levelEmbedColor
 import org.springframework.stereotype.Component
@@ -39,16 +38,17 @@ class EmbedService(
             val level = levelService.calculateLevelFromXp(userLevel.xp)
             formattedLeaderboard
                 .append("${startingRank + index}. ")
-                .append("<@${userLevel.memberId.asString()}> ")
-                .append("${xpFormat.format(userLevel.xp)}xp ")
-                .append("lvl $level")
+                .append("<@${userLevel.memberId.asString()}>")
+                .append(" - ")
+                .append("${xpFormat.format(userLevel.xp)} XP ")
+                .append("(Lvl $level)")
                 .appendLine()
         }
 
         return EmbedCreateSpec.builder()
-            .author("Makima", null, iconUrl)
+            .author("Leaderboard for ${guild.name}", null, guild.getIconUrl(Image.Format.PNG).orElse(iconUrl))
             .color(levelEmbedColor)
-            .title("Leaderboard for ${guild.name}".embedTitleSafe())
+            .title("Members Sorted by XP")
             .description(formattedLeaderboard.toString())
             .footer("Page ${page + 1}/$pageCount", null)
             .timestamp(Instant.now())
