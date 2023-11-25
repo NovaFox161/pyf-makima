@@ -56,7 +56,7 @@ class MessageService(
     /// Rule 9 message functions ///
     ////////////////////////////////
     suspend fun qualifiesForRuleNine(message: Message): Boolean {
-        LOGGER.debug("Checking if message ${message.id.asString()} qualifies...")
+        LOGGER.debug("Checking if message ${message.id.asString()} qualifies for rule 9")
 
         val monitoredChannels = Config.MESSAGE_DELETE_CHANNEL.getString()
             .split(",")
@@ -140,6 +140,7 @@ class MessageService(
 
         val message = discordClient
             .getMessageById(channelId, messageId)
+            .doOnError { LOGGER.error("Error trying to fetch message ${messageId.asString()} for rule 9 delete", it) }
             .onErrorResume { Mono.empty() }
             .awaitSingleOrNull() ?: return
 
