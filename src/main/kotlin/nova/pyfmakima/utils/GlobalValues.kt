@@ -8,7 +8,8 @@ object GlobalValues {
     var iconUrl: String? = null
 
     val defaultEmbedColor: Color = Color.of(25, 77, 238)
-    val levelEmbedColor: Color = Color.of(126, 89, 40)
+    val levelEmbedColor: Color = Color.of(126, 211, 33)
+    val modEmbedColor: Color = Color.of(126, 89, 40)
     val errorColor: Color  = Color.of(248, 38, 48)
     val warnColor: Color = Color.of(232, 150, 0)
 
