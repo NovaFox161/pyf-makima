@@ -7,8 +7,8 @@ import discord4j.rest.util.Image
 import kotlinx.coroutines.reactor.awaitSingle
 import nova.pyfmakima.config.Config
 import nova.pyfmakima.extensions.embedTitleSafe
-import nova.pyfmakima.utils.GlobalValues.embedColor
 import nova.pyfmakima.utils.GlobalValues.iconUrl
+import nova.pyfmakima.utils.GlobalValues.levelEmbedColor
 import org.springframework.stereotype.Component
 import java.math.RoundingMode
 import java.text.DecimalFormat
@@ -47,7 +47,7 @@ class EmbedService(
 
         return EmbedCreateSpec.builder()
             .author("Makima", null, iconUrl)
-            .color(embedColor)
+            .color(levelEmbedColor)
             .title("Leaderboard for ${guild.name}".embedTitleSafe())
             .description(formattedLeaderboard.toString())
             .footer("Page ${page + 1}/$pageCount", null)
@@ -96,7 +96,7 @@ class EmbedService(
             .author("Tier #", null, guildIcon)
             .title("Rank #${currentRank}")
             .description("<@${member.id.asString()}>")
-            .color(embedColor)
+            .color(levelEmbedColor)
             .addField("Level & Progress", levelAndProgressContent, false)
             .addField("Engagement Overview", engagementOverviewContent, false)
             .addField("Score Summary", scoreSummaryContent, false)
