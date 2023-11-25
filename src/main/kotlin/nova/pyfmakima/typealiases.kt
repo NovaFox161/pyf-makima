@@ -10,3 +10,4 @@ typealias MessageRecordCache = CacheRepository<Snowflake, MessageRecord>
 typealias UserLevelCache = CacheRepository<Snowflake, UserLevel>
 typealias DaysActiveCache = CacheRepository<Snowflake, Long>
 typealias LeveledUserCountCache = CacheRepository<Snowflake, Long>
+typealias Rule9TrackedMessageCache = CacheRepository<Snowflake, Snowflake>

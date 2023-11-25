@@ -1,10 +1,7 @@
 package nova.pyfmakima.config
 
 import com.fasterxml.jackson.databind.ObjectMapper
-import nova.pyfmakima.DaysActiveCache
-import nova.pyfmakima.LeveledUserCountCache
-import nova.pyfmakima.MessageRecordCache
-import nova.pyfmakima.UserLevelCache
+import nova.pyfmakima.*
 import nova.pyfmakima.cache.JdkCacheRepository
 import nova.pyfmakima.cache.RedisStringCacheRepository
 import nova.pyfmakima.extensions.asMinutes
@@ -20,6 +17,7 @@ class CacheConfig {
     private val userLevelTtl = Config.CACHE_TTL_USER_LEVEL_MINUTES.getLong().asMinutes()
     private val daysActiveTtl = Config.CACHE_TTL_DAYS_ACTIVE_MINUTES.getLong().asMinutes()
     private val leveledUserCountTtl = Config.CACHE_TTL_LEVELED_USER_MINUTES.getLong().asMinutes()
+    private val rule9TrackedMessageTtl = Config.CACHE_TTL_RULE_9_MESSAGE_MINUTES.getLong().asMinutes()
 
     // Redis caching
     @Bean
@@ -46,6 +44,12 @@ class CacheConfig {
     fun leveledUserCountRedisCache(objectMapper: ObjectMapper, redisTemplate: ReactiveStringRedisTemplate): LeveledUserCountCache =
         RedisStringCacheRepository(objectMapper, redisTemplate, "LeveledUserCounts", leveledUserCountTtl)
 
+    @Bean(name = ["rule9TrackedMessageCache"])
+    @Primary
+    @ConditionalOnProperty("bot.cache.redis", havingValue = "true")
+    fun rule9TrackedMessageRedisCache(objectMapper: ObjectMapper, redisTemplate: ReactiveStringRedisTemplate): Rule9TrackedMessageCache =
+        RedisStringCacheRepository(objectMapper, redisTemplate, "Rule9TrackedMessages", rule9TrackedMessageTtl)
+
 
 
     // In-memory fallback caching
@@ -60,4 +64,7 @@ class CacheConfig {
 
     @Bean(name = ["leveledUserCountCache"])
     fun leveledUserCountCache(): LeveledUserCountCache = JdkCacheRepository(leveledUserCountTtl)
+
+    @Bean(name = ["rule9TrackedMessageCache"])
+    fun rule9TrackedMessageCache(): Rule9TrackedMessageCache = JdkCacheRepository(rule9TrackedMessageTtl)
 }
