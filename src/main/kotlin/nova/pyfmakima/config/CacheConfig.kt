@@ -18,6 +18,7 @@ class CacheConfig {
     private val daysActiveTtl = Config.CACHE_TTL_DAYS_ACTIVE_MINUTES.getLong().asMinutes()
     private val leveledUserCountTtl = Config.CACHE_TTL_LEVELED_USER_MINUTES.getLong().asMinutes()
     private val rule9TrackedMessageTtl = Config.CACHE_TTL_RULE_9_MESSAGE_MINUTES.getLong().asMinutes()
+    private val tierTtl = Config.CACHE_TTL_TIER_MINUTES.getLong().asMinutes()
 
     // Redis caching
     @Bean
@@ -50,6 +51,12 @@ class CacheConfig {
     fun rule9TrackedMessageRedisCache(objectMapper: ObjectMapper, redisTemplate: ReactiveStringRedisTemplate): Rule9TrackedMessageCache =
         RedisStringCacheRepository(objectMapper, redisTemplate, "Rule9TrackedMessages", rule9TrackedMessageTtl)
 
+    @Bean
+    @Primary
+    @ConditionalOnProperty("bot.cache.redis", havingValue = "true")
+    fun tierRedisCache(objectMapper: ObjectMapper, redisTemplate: ReactiveStringRedisTemplate): TierCache =
+        RedisStringCacheRepository(objectMapper, redisTemplate, "Tiers", tierTtl)
+
 
 
     // In-memory fallback caching
@@ -67,4 +74,7 @@ class CacheConfig {
 
     @Bean(name = ["rule9TrackedMessageCache"])
     fun rule9TrackedMessageCache(): Rule9TrackedMessageCache = JdkCacheRepository(rule9TrackedMessageTtl)
+
+    @Bean
+    fun tierCache(): TierCache = JdkCacheRepository(tierTtl)
 }

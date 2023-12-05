@@ -33,7 +33,10 @@ interface UserLevelRepository : R2dbcRepository<UserLevelData, Long> {
 
     @Query("""
         UPDATE user_levels
-        SET xp = :xp
+        SET xp = :xp,
+            tier_xp = :tierXp,
+            current_tier_id = :currentTierId,
+            tier_paused = :tierPaused
         WHERE guild_id = :guildId 
             AND member_id = :memberId
     """)
@@ -41,5 +44,8 @@ interface UserLevelRepository : R2dbcRepository<UserLevelData, Long> {
         guildId: Long,
         memberId: Long,
         xp: Float,
+        tierXp: Float,
+        currentTierId: Long?,
+        tierPaused: Boolean,
     ): Mono<Int>
 }

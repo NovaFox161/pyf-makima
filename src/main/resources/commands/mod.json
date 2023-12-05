@@ -1,0 +1,18 @@
+{
+  "name": "mod",
+  "description": "A set of commands for management of the bot",
+  "default_permissions": "32",
+  "dm_permission": false,
+  "options": [
+    {
+      "type": 1,
+      "name": "tier",
+      "description": "Allows overriding and controlling the tier of a user",
+      "options": [
+        {
+          "type":
+        }
+      ]
+    }
+  ]
+}

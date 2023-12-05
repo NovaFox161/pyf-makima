@@ -6,10 +6,14 @@ import discord4j.core.`object`.entity.Message
 import kotlinx.coroutines.reactor.awaitSingle
 import kotlinx.coroutines.reactor.awaitSingleOrNull
 import nova.pyfmakima.LeveledUserCountCache
+import nova.pyfmakima.TierCache
 import nova.pyfmakima.UserLevelCache
 import nova.pyfmakima.config.Config
+import nova.pyfmakima.database.TierData
+import nova.pyfmakima.database.TierRepository
 import nova.pyfmakima.database.UserLevelData
 import nova.pyfmakima.database.UserLevelRepository
+import nova.pyfmakima.`object`.Tier
 import nova.pyfmakima.`object`.UserLevel
 import org.springframework.beans.factory.annotation.Qualifier
 import org.springframework.data.domain.Pageable
@@ -24,6 +28,8 @@ class LevelService(
     private val messageService: MessageService,
     private val userLevelRepository: UserLevelRepository,
     private val userLevelCache: UserLevelCache,
+    private val tierRepository: TierRepository,
+    private val tierCache: TierCache,
     @Qualifier("leveledUserCountCache")
     private val leveledUserCountCache: LeveledUserCountCache,
 ) {
@@ -178,7 +184,7 @@ class LevelService(
 
         level = userLevelRepository.findByGuildIdAndMemberId(guildId.asLong(), memberId.asLong())
             .map(::UserLevel)
-            .awaitSingleOrNull() ?: UserLevel(guildId, memberId, 0f)
+            .awaitSingleOrNull() ?: UserLevel(guildId, memberId, 0f, 0f, null, false)
 
         userLevelCache.put(guildId, memberId, level)
         return level
@@ -190,12 +196,18 @@ class LevelService(
                 guildId = userLevel.guildId.asLong(),
                 memberId = userLevel.memberId.asLong(),
                 xp = userLevel.xp,
+                tierXp = userLevel.tierXp,
+                currentTierId = userLevel.currentTierId,
+                tierPaused = userLevel.tierPaused,
             ).awaitSingleOrNull()
         } else {
             userLevelRepository.save(UserLevelData(
                 guildId = userLevel.guildId.asLong(),
                 memberId = userLevel.memberId.asLong(),
                 xp = userLevel.xp,
+                tierXp = userLevel.tierXp,
+                currentTierId = userLevel.currentTierId,
+                tierPaused = userLevel.tierPaused,
             )).awaitSingleOrNull()
 
             leveledUserCountCache.evict(key = userLevel.guildId)
@@ -233,6 +245,54 @@ class LevelService(
         return ceil(totalRecords / leaderboardPageSize.toDouble()).toInt()
     }
 
+    //////////////////////
+    /// Tier functions ///
+    //////////////////////
+    suspend fun createTier(tier: Tier): Tier {
+        val createdTier = tierRepository.save(TierData(
+            guildId = tier.guildId.asLong(),
+            name = tier.name,
+            levelEquivalent = tier.levelEquivalent,
+            roleId = tier.roleId?.asLong(),
+            removePreviousRoles = tier.removePreviousRoles,
+        )).map(::Tier).awaitSingle()
+
+        tierCache.put(createdTier.guildId, createdTier.id, createdTier)
+
+        return createdTier
+    }
+
+    suspend fun getTier(guildId: Snowflake, tierId: Long): Tier? {
+        var tier = tierCache.get(guildId, tierId)
+        if (tier != null) return tier
+
+        tier = tierRepository.findByGuildIdAndId(guildId.asLong(), tierId)
+            .map(::Tier)
+            .awaitSingleOrNull()
+
+        if (tier != null) tierCache.put(guildId, tierId, tier)
+        return tier
+    }
+
+    suspend fun updateTier(tier: Tier) {
+        tierRepository.updateByIdAnAndGuildId(
+            id = tier.id,
+            guildId = tier.guildId.asLong(),
+            name = tier.name,
+            levelEquivalent = tier.levelEquivalent,
+            roleId = tier.roleId?.asLong(),
+            removePreviousRoles = tier.removePreviousRoles,
+        ).awaitSingleOrNull()
+
+        tierCache.put(tier.guildId, tier.id, tier)
+    }
+
+    suspend fun deleteTier(guildId: Snowflake, tierId: Long) {
+        tierRepository.deleteByGuildIdAndId(guildId.asLong(), tierId).awaitSingleOrNull()
+        tierCache.evict(guildId, tierId)
+    }
+
+
     //////////////////////////////
     /// Level action functions ///
     //////////////////////////////
@@ -247,8 +307,17 @@ class LevelService(
         if (newLevel > currentLevel) {
             // TODO: Add handling for level up
         }
+        // TODO: Add tier stuff here please
 
         upsertUserLevel(userLevel.copy(xp = userLevel.xp + xpGained))
     }
+
+    suspend fun toggleTierPaused(guildId: Snowflake, memberId: Snowflake, shouldPause: Boolean) {
+        val userLevel = getUserLevel(guildId, memberId)
+
+        upsertUserLevel(userLevel.copy(tierPaused = shouldPause))
+    }
+
+    // TODO: Should have functions in here for resetting tier XP and stuffs
 }
 

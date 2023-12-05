@@ -21,6 +21,7 @@ enum class Config(private val key: String, private var value: Any? = null) {
     CACHE_TTL_DAYS_ACTIVE_MINUTES("bot.cache.ttl-minutes.days-active", 60),
     CACHE_TTL_LEVELED_USER_MINUTES("bot.cache.ttl-minutes.leveled-user", 60),
     CACHE_TTL_RULE_9_MESSAGE_MINUTES("bot.cache.ttl-minutes.rule-9-message", 15),
+    CACHE_TTL_TIER_MINUTES("bot.cache.ttl-minutes.tier", 60),
 
     // Global bot timings
     TIMING_MESSAGE_REACT_SECONDS("bot.timing.message-react.seconds", 60),
