@@ -24,7 +24,7 @@ class ModCommand(
         // Check permissions server-side just in case
         val memberRoles = event.interaction.member.map(Member::getRoleIds).get()
         if (!memberRoles.contains(modRoleId)) {
-            event.createFollowup("Only users with the <@&$modRoleId> role can use this command.")
+            event.createFollowup("Only users with the <@&${modRoleId.asString()}> role can use this command.")
                 .withEphemeral(ephemeral)
                 .awaitSingleOrNull()
             return
