@@ -1,5 +1,6 @@
 package nova.pyfmakima.business
 
+import discord4j.common.util.Snowflake
 import discord4j.core.`object`.entity.Guild
 import discord4j.core.`object`.entity.Member
 import discord4j.core.spec.EmbedCreateSpec
@@ -8,6 +9,7 @@ import kotlinx.coroutines.reactor.awaitSingle
 import nova.pyfmakima.config.Config
 import nova.pyfmakima.utils.GlobalValues.iconUrl
 import nova.pyfmakima.utils.GlobalValues.levelEmbedColor
+import nova.pyfmakima.utils.GlobalValues.modEmbedColor
 import org.springframework.stereotype.Component
 import java.math.RoundingMode
 import java.text.DecimalFormat
@@ -101,6 +103,20 @@ class EmbedService(
             .addField("Engagement Overview", engagementOverviewContent, false)
             .addField("Score Summary", scoreSummaryContent, false)
             .addField("Average Message XP", "`${xpFormatLong.format((userLevel.xp / totalTrackedMessages))}`", false)
+            .thumbnail(member.effectiveAvatarUrl)
+            .timestamp(Instant.now())
+            .build()
+    }
+
+    suspend fun generateModRoleAddEmbed(member: Member, roleId: Snowflake, reason: String): EmbedCreateSpec {
+        val guildIcon = member.guild.map { it.getIconUrl(Image.Format.PNG).orElse(iconUrl) }.awaitSingle()
+
+        return EmbedCreateSpec.builder()
+            .author("Moderator Action", null, guildIcon)
+            .title("Role Granted")
+            .color(modEmbedColor)
+            .description("Granted ${member.mention} <@&${roleId.asString()}>")
+            .addField("Reason", reason, false)
             .thumbnail(member.effectiveAvatarUrl)
             .timestamp(Instant.now())
             .build()
