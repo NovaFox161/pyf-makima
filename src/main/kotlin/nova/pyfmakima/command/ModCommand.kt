@@ -57,7 +57,7 @@ class ModCommand(
 
         val success = moderationService.addModRole(event.interaction.guildId.get(), user, role, reason)
 
-        if (success) event.createFollowup("A mod message has been posted in <#$auditLogChannelId>.")
+        if (success) event.createFollowup("A mod message has been posted in <#${auditLogChannelId.asString()}>.")
             .withEphemeral(ephemeral)
             .awaitSingleOrNull()
         else event.createFollowup("Makima failed to update the user's roles. Do they already have the role?")
