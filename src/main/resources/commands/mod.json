@@ -33,6 +33,62 @@
                 "required": true
             }
           ]
+        },
+        {
+          "name": "remove",
+            "description": "Removes a role from a user",
+            "type": 1,
+            "options": [
+              {
+                "name": "user",
+                "description": "The user to remove the role from",
+                "type": 6,
+                "required": true
+              },
+              {
+                "name": "role",
+                "description": "The role to remove",
+                "type": 8,
+                "required": true
+              },
+              {
+                  "name": "reason",
+                  "description": "The reason for removing the role",
+                  "type": 3,
+                  "required": true
+              }
+            ]
+        },
+        {
+          "name": "update",
+          "description": "Swaps one role for another",
+          "type": 1,
+            "options": [
+                {
+                "name": "user",
+                "description": "The user to swap the role for",
+                "type": 6,
+                "required": true
+                },
+                {
+                "name": "old_role",
+                "description": "The role to remove",
+                "type": 8,
+                "required": true
+                },
+                {
+                "name": "new_role",
+                "description": "The role to add",
+                "type": 8,
+                "required": true
+                },
+                {
+                    "name": "reason",
+                    "description": "The reason for swapping the role",
+                    "type": 3,
+                    "required": true
+                }
+            ]
         }
       ]
     }

@@ -122,6 +122,37 @@ class EmbedService(
             .build()
     }
 
+    suspend fun generateModRoleRemoveEmbed(member: Member, roleId: Snowflake, reason: String): EmbedCreateSpec {
+        val guildIcon = member.guild.map { it.getIconUrl(Image.Format.PNG).orElse(iconUrl) }.awaitSingle()
+
+        return EmbedCreateSpec.builder()
+            .author("Moderator Action", null, guildIcon)
+            .title("Role Removed")
+            .color(modEmbedColor)
+            .description("Removed <@&${roleId.asString()}> from ${member.mention}")
+            .addField("Reason", reason, false)
+            .thumbnail(member.effectiveAvatarUrl)
+            .timestamp(Instant.now())
+            .build()
+    }
+
+    suspend fun generateModRoleUpdateEmbed(member: Member, oldRoleId: Snowflake, newRoleId: Snowflake, reason: String): EmbedCreateSpec {
+        val guildIcon = member.guild.map { it.getIconUrl(Image.Format.PNG).orElse(iconUrl) }.awaitSingle()
+
+        return EmbedCreateSpec.builder()
+            .author("Moderator Action", null, guildIcon)
+            .title("Roles Updated")
+            .color(modEmbedColor)
+            .description("""
+                Granted ${member.mention} <@&${newRoleId.asString()}>
+                "Removed <@&${oldRoleId.asString()}> from ${member.mention}
+            """.trimMargin())
+            .addField("Reason", reason, false)
+            .thumbnail(member.effectiveAvatarUrl)
+            .timestamp(Instant.now())
+            .build()
+    }
+
     private fun generateXpProgressBar(currentXp: Float, xpToNextLevel: Float): String {
         val progressBarLength = 10
         val progressBarFill = ceil((currentXp / xpToNextLevel) * progressBarLength).toInt()
