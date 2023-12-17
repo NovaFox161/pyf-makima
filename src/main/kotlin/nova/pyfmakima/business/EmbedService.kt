@@ -1,14 +1,15 @@
 package nova.pyfmakima.business
 
+import discord4j.common.util.Snowflake
 import discord4j.core.`object`.entity.Guild
 import discord4j.core.`object`.entity.Member
 import discord4j.core.spec.EmbedCreateSpec
 import discord4j.rest.util.Image
 import kotlinx.coroutines.reactor.awaitSingle
 import nova.pyfmakima.config.Config
-import nova.pyfmakima.extensions.embedTitleSafe
-import nova.pyfmakima.utils.GlobalValues.embedColor
 import nova.pyfmakima.utils.GlobalValues.iconUrl
+import nova.pyfmakima.utils.GlobalValues.levelEmbedColor
+import nova.pyfmakima.utils.GlobalValues.modEmbedColor
 import org.springframework.stereotype.Component
 import java.math.RoundingMode
 import java.text.DecimalFormat
@@ -39,16 +40,17 @@ class EmbedService(
             val level = levelService.calculateLevelFromXp(userLevel.xp)
             formattedLeaderboard
                 .append("${startingRank + index}. ")
-                .append("<@${userLevel.memberId.asString()}> ")
-                .append("${xpFormat.format(userLevel.xp)}xp ")
-                .append("lvl $level")
+                .append("<@${userLevel.memberId.asString()}>")
+                .append(" - ")
+                .append("${xpFormat.format(userLevel.xp)} XP ")
+                .append("(Lvl $level)")
                 .appendLine()
         }
 
         return EmbedCreateSpec.builder()
-            .author("Makima", null, iconUrl)
-            .color(embedColor)
-            .title("Leaderboard for ${guild.name}".embedTitleSafe())
+            .author("Leaderboard for ${guild.name}", null, guild.getIconUrl(Image.Format.PNG).orElse(iconUrl))
+            .color(levelEmbedColor)
+            .title("Members Sorted by XP")
             .description(formattedLeaderboard.toString())
             .footer("Page ${page + 1}/$pageCount", null)
             .timestamp(Instant.now())
@@ -96,11 +98,56 @@ class EmbedService(
             .author("Tier #", null, guildIcon)
             .title("Rank #${currentRank}")
             .description("<@${member.id.asString()}>")
-            .color(embedColor)
+            .color(levelEmbedColor)
             .addField("Level & Progress", levelAndProgressContent, false)
             .addField("Engagement Overview", engagementOverviewContent, false)
             .addField("Score Summary", scoreSummaryContent, false)
             .addField("Average Message XP", "`${xpFormatLong.format((userLevel.xp / totalTrackedMessages))}`", false)
+            .thumbnail(member.effectiveAvatarUrl)
+            .timestamp(Instant.now())
+            .build()
+    }
+
+    suspend fun generateModRoleAddEmbed(member: Member, roleId: Snowflake, reason: String): EmbedCreateSpec {
+        val guildIcon = member.guild.map { it.getIconUrl(Image.Format.PNG).orElse(iconUrl) }.awaitSingle()
+
+        return EmbedCreateSpec.builder()
+            .author("Moderator Action", null, guildIcon)
+            .title("Role Granted")
+            .color(modEmbedColor)
+            .description("Granted ${member.mention} <@&${roleId.asString()}>")
+            .addField("Reason", reason, false)
+            .thumbnail(member.effectiveAvatarUrl)
+            .timestamp(Instant.now())
+            .build()
+    }
+
+    suspend fun generateModRoleRemoveEmbed(member: Member, roleId: Snowflake, reason: String): EmbedCreateSpec {
+        val guildIcon = member.guild.map { it.getIconUrl(Image.Format.PNG).orElse(iconUrl) }.awaitSingle()
+
+        return EmbedCreateSpec.builder()
+            .author("Moderator Action", null, guildIcon)
+            .title("Role Removed")
+            .color(modEmbedColor)
+            .description("Removed <@&${roleId.asString()}> from ${member.mention}")
+            .addField("Reason", reason, false)
+            .thumbnail(member.effectiveAvatarUrl)
+            .timestamp(Instant.now())
+            .build()
+    }
+
+    suspend fun generateModRoleUpdateEmbed(member: Member, oldRoleId: Snowflake, newRoleId: Snowflake, reason: String): EmbedCreateSpec {
+        val guildIcon = member.guild.map { it.getIconUrl(Image.Format.PNG).orElse(iconUrl) }.awaitSingle()
+
+        return EmbedCreateSpec.builder()
+            .author("Moderator Action", null, guildIcon)
+            .title("Roles Updated")
+            .color(modEmbedColor)
+            .description("""
+                Granted ${member.mention} <@&${newRoleId.asString()}>
+                Removed <@&${oldRoleId.asString()}> from ${member.mention}
+            """.trimMargin())
+            .addField("Reason", reason, false)
             .thumbnail(member.effectiveAvatarUrl)
             .timestamp(Instant.now())
             .build()

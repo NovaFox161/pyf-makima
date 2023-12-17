@@ -16,6 +16,7 @@ import kotlinx.coroutines.reactor.awaitSingleOrNull
 import kotlinx.coroutines.reactor.mono
 import nova.pyfmakima.DaysActiveCache
 import nova.pyfmakima.MessageRecordCache
+import nova.pyfmakima.Rule9TrackedMessageCache
 import nova.pyfmakima.config.Config
 import nova.pyfmakima.database.MessageRecordData
 import nova.pyfmakima.database.MessageRecordRepository
@@ -36,7 +37,6 @@ import java.time.Duration
 import java.time.Instant
 import java.time.LocalDate
 import java.time.ZoneOffset
-import java.util.concurrent.CopyOnWriteArrayList
 
 @Component
 class MessageService(
@@ -44,19 +44,18 @@ class MessageService(
     private val messageRecordCache: MessageRecordCache,
     @Qualifier("daysActiveCache")
     private val daysActiveCache: DaysActiveCache,
+    private val rule9TrackedMessageCache: Rule9TrackedMessageCache,
     private val metricService: MetricService,
     private val beanFactory: BeanFactory,
 ) {
     private val discordClient: GatewayDiscordClient
         get() = beanFactory.getBean()
 
-    private val trackedMessages = CopyOnWriteArrayList<Snowflake>()
-
     ////////////////////////////////
     /// Rule 9 message functions ///
     ////////////////////////////////
     suspend fun qualifiesForRuleNine(message: Message): Boolean {
-        LOGGER.debug("Checking if message ${message.id.asString()} qualifies...")
+        LOGGER.debug("Checking if message ${message.id.asString()} qualifies for rule 9")
 
         val monitoredChannels = Config.MESSAGE_DELETE_CHANNEL.getString()
             .split(",")
@@ -100,14 +99,14 @@ class MessageService(
     suspend fun  addToQueue(message: Message) {
         LOGGER.debug("Adding message ${message.id.asString()} to queue")
 
-        trackedMessages.add(message.id)
+        rule9TrackedMessageCache.put(message.guildId.get(), key = message.id, message.id)
         val messageReactDelay = Config.TIMING_MESSAGE_REACT_SECONDS.getLong().asSeconds()
         val messageDeleteDelay = Config.TIMING_MESSAGE_DELETE_SECONDS.getLong().asSeconds()
 
         val reactMono = Mono.delay(messageReactDelay)
             .flatMap { mono { doReaction(message.id, message.channelId) } }
         val deleteMono = Mono.delay(messageDeleteDelay)
-            .flatMap { mono { doDelete(message.id, message.channelId) } }
+            .flatMap { mono { doDelete(message.id, message.channelId, message.guildId.get()) } }
 
         metricService.incrementMessageQualifyRuleNine()
 
@@ -132,21 +131,21 @@ class MessageService(
             .awaitSingleOrNull()
     }
 
-    suspend fun doDelete(messageId: Snowflake, channelId: Snowflake) {
+    suspend fun doDelete(messageId: Snowflake, channelId: Snowflake, guildId: Snowflake) {
         LOGGER.debug("Running delete task for message ${messageId.asString()}")
 
-        if (!trackedMessages.contains(messageId)) return
-        trackedMessages.remove(messageId)
+        rule9TrackedMessageCache.getAndRemove(guildId, key = messageId) ?: return // No longer tracked if null
 
         val message = discordClient
             .getMessageById(channelId, messageId)
+            .doOnError { LOGGER.error("Error trying to fetch message ${messageId.asString()} for rule 9 delete", it) }
             .onErrorResume { Mono.empty() }
             .awaitSingleOrNull() ?: return
 
         if (!qualifiesForRuleNine(message)) return // No longer qualifies
         LOGGER.debug("Message still qualifies to be deleted ${messageId.asString()}")
 
-        message.delete("Violates rule 3 and was not manually deleted before the timeout")
+        message.delete("Violates rule 9 and was not manually deleted before the timeout")
             .doOnError { LOGGER.error("Failed to delete message ${message.id.asString()}", it) }
             .onErrorResume { Mono.empty() }
             .awaitSingleOrNull()
@@ -167,7 +166,7 @@ class MessageService(
 
         if (qualifiesForRuleNine(message)) return // No reason to remove the reaction
 
-        trackedMessages.remove(messageId)
+        rule9TrackedMessageCache.evict(message.guildId.get(), key = messageId)
         message.removeSelfReaction(getWarningEmote())
             .doOnError { LOGGER.error("Failed to remove warning reaction ${message.id.asString()}", it) }
             .onErrorResume { Mono.empty() }

@@ -101,6 +101,6 @@ class DiscordWebhookAppender : AppenderBase<ILoggingEvent>() {
     private fun getEmbedColor(event: ILoggingEvent): Int {
         return if (event.level.equals(Level.ERROR) || event.throwableProxy != null) GlobalValues.errorColor.rgb
         else if (event.level.equals(Level.WARN)) GlobalValues.warnColor.rgb
-        else GlobalValues.embedColor.rgb
+        else GlobalValues.defaultEmbedColor.rgb
     }
 }
