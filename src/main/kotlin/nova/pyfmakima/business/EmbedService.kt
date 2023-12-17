@@ -145,7 +145,7 @@ class EmbedService(
             .color(modEmbedColor)
             .description("""
                 Granted ${member.mention} <@&${newRoleId.asString()}>
-                "Removed <@&${oldRoleId.asString()}> from ${member.mention}
+                Removed <@&${oldRoleId.asString()}> from ${member.mention}
             """.trimMargin())
             .addField("Reason", reason, false)
             .thumbnail(member.effectiveAvatarUrl)
