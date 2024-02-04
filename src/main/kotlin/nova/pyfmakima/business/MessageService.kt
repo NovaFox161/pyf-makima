@@ -96,7 +96,7 @@ class MessageService(
         return false
     }
 
-    suspend fun  addToQueue(message: Message) {
+    suspend fun addToQueue(message: Message) {
         LOGGER.debug("Adding message ${message.id.asString()} to queue")
 
         rule9TrackedMessageCache.put(message.guildId.get(), key = message.id, message.id)
@@ -110,7 +110,7 @@ class MessageService(
 
         metricService.incrementMessageQualifyRuleNine()
 
-        Mono.`when`(reactMono, deleteMono).awaitSingleOrNull()
+        Mono.`when`(reactMono, deleteMono).subscribe()
     }
 
     suspend fun doReaction(messageId: Snowflake, channelId: Snowflake) {
@@ -142,7 +142,10 @@ class MessageService(
             .onErrorResume { Mono.empty() }
             .awaitSingleOrNull() ?: return
 
-        if (!qualifiesForRuleNine(message)) return // No longer qualifies
+        if (!qualifiesForRuleNine(message)) {
+            LOGGER.debug("Message no longer qualifies for deletion ${messageId.asString()}")
+            return // No longer qualifies
+        }
         LOGGER.debug("Message still qualifies to be deleted ${messageId.asString()}")
 
         message.delete("Violates rule 9 and was not manually deleted before the timeout")
