@@ -143,11 +143,12 @@ class EmbedService(
             .author("Moderator Action", null, guildIcon)
             .title("Roles Updated")
             .color(modEmbedColor)
-            .description("""
-                Granted ${member.mention} <@&${newRoleId.asString()}>
-                Removed <@&${oldRoleId.asString()}> from ${member.mention}
-            """.trimMargin())
-            .addField("Reason", reason, false)
+            .description(
+                StringBuilder()
+                    .appendLine("Granted ${member.mention} <@&${newRoleId.asString()}>")
+                    .append("Removed <@&${oldRoleId.asString()}> from ${member.mention}")
+                    .toString()
+            ).addField("Reason", reason, false)
             .thumbnail(member.effectiveAvatarUrl)
             .timestamp(Instant.now())
             .build()

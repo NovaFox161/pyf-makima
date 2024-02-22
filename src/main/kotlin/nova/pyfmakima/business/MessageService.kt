@@ -50,6 +50,10 @@ class MessageService(
 ) {
     private val discordClient: GatewayDiscordClient
         get() = beanFactory.getBean()
+    private val rule9Channels = Config.MESSAGE_DELETE_CHANNEL.getString()
+        .split(",")
+        .filter(String::isNotBlank)
+        .map(Snowflake::of)
 
     ////////////////////////////////
     /// Rule 9 message functions ///
@@ -57,14 +61,9 @@ class MessageService(
     suspend fun qualifiesForRuleNine(message: Message): Boolean {
         LOGGER.debug("Checking if message ${message.id.asString()} qualifies for rule 9")
 
-        val monitoredChannels = Config.MESSAGE_DELETE_CHANNEL.getString()
-            .split(",")
-            .filter(String::isNotBlank)
-            .map(Snowflake::of)
-
         // Filter messages that will never qualify
         if (!message.guildId.isPresent) return false
-        if (!monitoredChannels.contains(message.channelId)) return false
+        if (!rule9Channels.contains(message.channelId)) return false
         if (message.authorAsMember.map(Member::isBot).awaitSingle()) return false
 
         // Check if a mod has already reacted with the correct reaction (making it allowed no matter the content)
@@ -85,7 +84,7 @@ class MessageService(
         // Check if the message contains links that do not link to discord
         val urlMatchCount = message.content.extractUrls()
             // Filter out discord links, they don't count
-            .asSequence()
+            .stream()
             .map { LOGGER.debug("URL Match found: {}", it); it }
             .filter { !it.host.startsWith("discord.com") }
             .filter { !it.host.startsWith("canary.discord.com") }
@@ -96,7 +95,7 @@ class MessageService(
         return false
     }
 
-    suspend fun  addToQueue(message: Message) {
+    suspend fun addToQueue(message: Message) {
         LOGGER.debug("Adding message ${message.id.asString()} to queue")
 
         rule9TrackedMessageCache.put(message.guildId.get(), key = message.id, message.id)
@@ -110,7 +109,7 @@ class MessageService(
 
         metricService.incrementMessageQualifyRuleNine()
 
-        Mono.`when`(reactMono, deleteMono).awaitSingleOrNull()
+        Mono.`when`(reactMono, deleteMono).subscribe()
     }
 
     suspend fun doReaction(messageId: Snowflake, channelId: Snowflake) {
@@ -142,7 +141,10 @@ class MessageService(
             .onErrorResume { Mono.empty() }
             .awaitSingleOrNull() ?: return
 
-        if (!qualifiesForRuleNine(message)) return // No longer qualifies
+        if (!qualifiesForRuleNine(message)) {
+            LOGGER.debug("Message no longer qualifies for deletion ${messageId.asString()}")
+            return // No longer qualifies
+        }
         LOGGER.debug("Message still qualifies to be deleted ${messageId.asString()}")
 
         message.delete("Violates rule 9 and was not manually deleted before the timeout")

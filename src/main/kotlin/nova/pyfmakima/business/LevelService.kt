@@ -161,12 +161,25 @@ class LevelService(
             || message.stickersItems.isNotEmpty()
         val wordCount = message.content.trim().split(regex = Regex("\\s+")).size
 
+        // Baseline experience is awarded if the word count is 4 or more
+        val baselineExperience = if (wordCount >= 4) 2f else 0f
+
         val lengthScore = calculateLengthScore(wordCount, hasMedia)
         val rateScore = calculateRateScore(author)
+
+        // If the rateScore is 0, indicating a low messaging frequency, return 0 experience
+        if (rateScore == 0f) {
+            return 0f
+        }
+
         val longevityScore = calculateLongevityScore(author)
         val consistencyScore = calculateConsistencyScore(author)
 
-        return ((lengthScore * rateScore * ((longevityScore + consistencyScore) / 2)) * 10)
+        // Calculate the total experience gained from the message
+        val totalExperience = ((lengthScore * rateScore * ((longevityScore + consistencyScore) / 2)) * 10) + baselineExperience
+
+        // Ensure that the minimum experience gained is at least the baseline for qualifying messages
+        return max(totalExperience, baselineExperience)
     }
 
     ////////////////////////////
