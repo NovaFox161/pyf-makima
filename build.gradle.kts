@@ -119,10 +119,10 @@ dependencies {
 jib {
     to {
         image = "rg.nl-ams.scw.cloud/dreamexposure/pyf-makima"
-        tags = mutableSetOf("latest", makimaVersion, buildVersion)
+        tags = mutableSetOf("latest", buildVersion)
     }
 
-    from.image = "eclipse-temurin:19-jre-alpine"
+    from.image = "eclipse-temurin:19-jre-alpine@sha256:dde223014bd6917ea00d9eb370add424dc5dfcbcfcb8e8efac15a050563d312e"
 }
 
 gitProperties {
