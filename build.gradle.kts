@@ -29,7 +29,6 @@ val javaVersion = "19"
 val d4jVersion = "3.3.0-M2"
 val d4jStoresVersion = "3.2.2"
 val discordWebhooksVersion = "0.8.4"
-val mySqlConnectorVersion = "8.0.33"
 val orgJsonVersion = "20240303"
 val springMockkVersion = "4.0.2"
 val logbackContribVersion = "0.1.5"
@@ -85,7 +84,7 @@ dependencies {
     implementation("org.flywaydb:flyway-core")
     implementation("org.flywaydb:flyway-mysql")
     implementation("io.asyncer:r2dbc-mysql")
-    implementation("mysql:mysql-connector-java:$mySqlConnectorVersion")
+    implementation("com.mysql:mysql-connector-j")
 
 
     // Serialization
