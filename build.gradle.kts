@@ -5,21 +5,21 @@ import org.gradle.api.tasks.wrapper.Wrapper.DistributionType.ALL
 
 plugins {
     // Kotlin
-    kotlin("jvm") version "1.9.10"
+    kotlin("jvm") version "1.9.23"
 
     // Spring
-    kotlin("plugin.spring") version "1.9.10"
-    id("org.springframework.boot") version "3.1.4"
-    id("io.spring.dependency-management") version "1.1.3"
+    kotlin("plugin.spring") version "1.9.23"
+    id("org.springframework.boot") version "3.2.3"
+    id("io.spring.dependency-management") version "1.1.4"
 
     // Tooling
     id("com.gorylenko.gradle-git-properties") version "2.4.1"
-    id("com.google.cloud.tools.jib") version "3.4.0"
+    id("com.google.cloud.tools.jib") version "3.4.1"
 }
 
 buildscript {
     dependencies {
-        classpath("com.squareup:kotlinpoet:1.14.2")
+        classpath("com.squareup:kotlinpoet:1.16.0")
     }
 }
 
@@ -30,6 +30,7 @@ val d4jVersion = "3.3.0-M2"
 val d4jStoresVersion = "3.2.2"
 val discordWebhooksVersion = "0.8.4"
 val mySqlConnectorVersion = "8.0.33"
+val orgJsonVersion = "20240303"
 val springMockkVersion = "4.0.2"
 val logbackContribVersion = "0.1.5"
 
@@ -90,6 +91,7 @@ dependencies {
     // Serialization
     implementation("com.fasterxml.jackson.module:jackson-module-kotlin")
     implementation("com.fasterxml.jackson.datatype:jackson-datatype-jsr310")
+    implementation("org.json:json:$orgJsonVersion")
 
     // Observability
     implementation("ch.qos.logback.contrib:logback-json-classic:$logbackContribVersion")
@@ -99,7 +101,10 @@ dependencies {
     // Discord
     implementation("com.discord4j:discord4j-core:$d4jVersion")
     implementation("com.discord4j:stores-redis:$d4jStoresVersion")
-    implementation("club.minnced:discord-webhooks:$discordWebhooksVersion")
+    implementation("club.minnced:discord-webhooks:$discordWebhooksVersion") {
+        // Due to vulnerability in older versions: https://github.com/advisories/GHSA-rm7j-f5g5-27vv
+        exclude(group = "org.json", module = "json")
+    }
 
     // Test
     testImplementation("org.springframework.boot:spring-boot-starter-test") {
