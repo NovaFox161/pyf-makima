@@ -24,7 +24,7 @@ buildscript {
 }
 
 val makimaVersion = "1.0.9"
-val gradleWrapperVersion = "8.2.1"
+val gradleWrapperVersion = "8.6"
 val javaVersion = "19"
 val d4jVersion = "3.3.0-M2"
 val d4jStoresVersion = "3.2.2"
@@ -43,7 +43,7 @@ val buildVersion = if (System.getenv("GITHUB_RUN_NUMBER") != null) {
     "$version.d${System.currentTimeMillis().div(1000)}" //Seconds since epoch
 }
 
-val kotlinSrcDir: File = buildDir.resolve("src/main/kotlin")
+val kotlinSrcDir: File = layout.buildDirectory.dir("src/main/kotlin").map(Directory::getAsFile).get()
 
 java {
     sourceCompatibility = JavaVersion.toVersion(javaVersion)
