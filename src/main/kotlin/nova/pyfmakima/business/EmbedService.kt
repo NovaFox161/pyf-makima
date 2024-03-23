@@ -85,7 +85,7 @@ class EmbedService(
             .toString()
 
         val engagementOverviewContent = StringBuilder()
-            .appendLine("Total XP: `${userLevel.xp}`")
+            .appendLine("Total XP: `${xpFormat.format(userLevel.xp)}`")
             .appendLine("Messages: `$totalTrackedMessages`")
             .appendLine("Days Active: `$daysActive`")
             .appendLine("Avg. Word Count: `${averageWordCount.toInt()}`")
