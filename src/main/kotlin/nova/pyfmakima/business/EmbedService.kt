@@ -62,6 +62,10 @@ class EmbedService(
         val currentRank = levelService.getCurrentRank(member.guildId, member.id)
         val currentLevel = levelService.calculateLevelFromXp(userLevel.xp)
         val xpToNextLevel = levelService.calculateXpToReachLevel(currentLevel + 1)
+        val xpToCurrentLevel = levelService.calculateXpToReachLevel(currentLevel)
+        val currentXpAdjusted = userLevel.xp - xpToCurrentLevel
+        val xpToNextLevelAdjusted = xpToNextLevel - xpToCurrentLevel
+
 
         val currentRateScore = levelService.calculateRateScore(member)
         val currentLongevityScore = levelService.calculateLongevityScore(member)
@@ -76,11 +80,12 @@ class EmbedService(
 
         val levelAndProgressContent = StringBuilder()
             .appendLine("Level: `$currentLevel`")
-            .appendLine("XP: `${xpFormat.format(userLevel.xp)}/${xpToNextLevel.toInt()}`")
-            .appendLine("Progress: `${generateXpProgressBar(userLevel.xp, xpToNextLevel)}`")
+            .appendLine("XP: `${xpFormat.format(currentXpAdjusted)}/${xpToNextLevelAdjusted.toInt()}`")
+            .appendLine("Progress: `${generateXpProgressBar(currentXpAdjusted, xpToNextLevelAdjusted)}`")
             .toString()
 
         val engagementOverviewContent = StringBuilder()
+            .appendLine("Total XP: `${xpFormat.format(userLevel.xp)}`")
             .appendLine("Messages: `$totalTrackedMessages`")
             .appendLine("Days Active: `$daysActive`")
             .appendLine("Avg. Word Count: `${averageWordCount.toInt()}`")
