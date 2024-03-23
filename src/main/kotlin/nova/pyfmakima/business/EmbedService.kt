@@ -156,7 +156,16 @@ class EmbedService(
 
     private fun generateXpProgressBar(currentXp: Float, xpToNextLevel: Float): String {
         val progressBarLength = 10
-        val progressBarFill = ceil((currentXp / xpToNextLevel) * progressBarLength).toInt()
+
+        //calculate range
+        val currentLevel = levelService.calculateLevelFromXp(currentXp)
+        val xpToCurrentLevel = levelService.calculateXpToReachLevel(currentLevel)
+        val currentXpAdjusted = currentXp - xpToCurrentLevel
+        val xpToNextLevelAdjusted = xpToNextLevel - xpToCurrentLevel
+
+
+        // Generate progress bar
+        val progressBarFill = ceil((currentXpAdjusted / xpToNextLevelAdjusted) * progressBarLength).toInt()
 
         return StringBuilder()
             .append("■".repeat(progressBarFill))
