@@ -170,7 +170,7 @@ class EmbedService(
         return StringBuilder()
             .append("■".repeat(progressBarFill))
             .append("□".repeat(progressBarLength - progressBarFill))
-            .append(" ${(currentXp / xpToNextLevel * 100).toInt()}%")
+            .append(" ${(currentXpAdjusted / xpToNextLevelAdjusted * 100).toInt()}%")
             .toString()
     }
 }
